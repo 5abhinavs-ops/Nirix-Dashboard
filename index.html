@@ -22,6 +22,36 @@ button { font-family: inherit; cursor: pointer; }
 .ttab.on { color:#FFFFFF;font-weight:500;background:#0D1F3C;border-bottom:2px solid #0D6A7A; }
 .chevron { display:inline-block;transition:transform 0.2s; }
 .chevron.open { transform:rotate(90deg); }
+.ctab { color:#6A8AAA;font-weight:400;border-bottom:2px solid transparent;background:transparent;cursor:pointer; }
+.ctab:hover { color:#FFFFFF; }
+.ctab.on { color:#FFFFFF;font-weight:700;background:#081828;border-bottom:2px solid #3A8FBF; }
+.cert-boat-item { padding:6px 10px 6px 0;font-size:11px;color:#8AA8C0;cursor:pointer;border-radius:4px; }
+.cert-boat-item:hover { color:#FFFFFF;background:rgba(58,143,191,0.07);padding-left:6px; }
+.cert-boat-item.active { color:#5AB8E8;font-weight:700; }
+/* Shared cert grid — name | gap(96px) | expiry(120px) | window(150px) | view(76px) */
+.cert-grid-head { display:grid;grid-template-columns:minmax(160px,1fr) 96px 120px 150px 76px;align-items:center;padding:6px 0;border-bottom:1px solid #1A2F4A;column-gap:0;margin-top:8px; }
+.cert-grid-head span { font-size:9px;font-weight:700;color:#5A7A9A;letter-spacing:0.08em;text-transform:uppercase; }
+.cert-grid-row { display:grid;grid-template-columns:minmax(160px,1fr) 96px 120px 150px 76px;align-items:center;padding:9px 0;border-bottom:0.5px solid #0D1A2E;transition:background 0.1s;column-gap:0; }
+.cert-grid-row:last-child { border-bottom:none; }
+.cert-grid-row:hover { background:rgba(58,143,191,0.04); }
+.cert-name { font-size:12px;color:#FFFFFF;font-weight:500;padding-right:8px; }
+.cert-gap {}
+.cert-expiry { font-size:11px;color:#FFFFFF;text-align:left; }
+.cert-window { font-size:10px;color:#7A9AB8;text-align:left;font-style:italic;padding-left:8px; }
+.cert-view-btn { text-align:right; }
+.cert-view-btn span { font-size:10px;color:#5AB8E8;cursor:pointer;border:0.5px solid #2A5A7A;border-radius:4px;padding:3px 8px;transition:all 0.15s;white-space:nowrap; }
+.cert-view-btn span:hover { background:rgba(58,143,191,0.18);color:#8AD8FF;border-color:#3A8FBF; }
+.cert-section-head { font-size:9px;font-weight:700;color:#5A9EC8;letter-spacing:0.12em;text-transform:uppercase;padding:14px 0 7px;border-bottom:0.5px solid #1A3050;margin-bottom:2px; }
+/* vessel-box for compliance overview */
+.vessel-box { display:flex;align-items:center;gap:10px;padding:9px 14px;background:#0E2040;border:1px solid #2A4A6A;border-left:3px solid #3A8FBF;border-radius:6px;margin:14px 0 4px;cursor:pointer;transition:background 0.15s; }
+.vessel-box:hover { background:#142850; }
+.vessel-box.expanded { background:#122645;border-color:#3A8FBF; }
+.vessel-box .vname { font-size:12px;font-weight:700;color:#FFFFFF;flex:1; }
+.vessel-box .vcnt { font-size:10px;color:#5A9EC8;font-weight:600; }
+.vessel-box .vtoggle { font-size:10px;color:#5A9EC8;transition:transform 0.2s; }
+.vessel-box.expanded .vtoggle { transform:rotate(90deg); }
+.ov-cert-list { display:none;padding:0 0 8px 0; }
+.ov-cert-list.open { display:block; }
 select { background:#0D1F3C;border:1px solid #1E3A5F;border-radius:6px;color:#FFFFFF;font-size:13px;font-weight:600;padding:6px 10px;cursor:pointer;outline:none;font-family:inherit; }
 select:hover { border-color:#0D8A9A; }
 select option { background:#0D1F3C;color:#FFFFFF; }
@@ -915,9 +945,11 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       document.getElementById('module-daily').style.display=mod==='daily'?'flex':'none';
       document.getElementById('module-runhrs').style.display=mod==='runhrs'?'flex':'none';
       document.getElementById('module-boatspecs').style.display=mod==='boatspecs'?'flex':'none';
+      document.getElementById('module-certs').style.display=mod==='certs'?'flex':'none';
       document.getElementById('tab-daily').style.opacity=mod==='daily'?'1':'0.55';
       document.getElementById('tab-runhrs').style.opacity=mod==='runhrs'?'1':'0.55';
       document.getElementById('tab-boatspecs').style.opacity=mod==='boatspecs'?'1':'0.55';
+      document.getElementById('tab-certs').style.opacity=mod==='certs'?'1':'0.55';
       if(mod==='daily')renderAll();
       else if(mod==='runhrs'){if(activeRunhrs==='fleet')renderFleet();else if(activeRunhrs==='runhrs')renderRunhrs();else renderSpecs();}
       else if(mod==='boatspecs')renderBoatSpecs();
@@ -946,6 +978,285 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         document.getElementById('app').style.display='flex';
         loadData();refreshTimer=setInterval(loadData,60000);
       }else{err.textContent='Incorrect password.';}
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  CERTIFICATION MODULE
+    // ═══════════════════════════════════════════════════════
+    let certActiveBoat = null;
+    let certActiveTab  = 'class';
+    let certOvBand     = 'exp'; // active compliance band
+
+    const CERT_DATA = {
+      'KM Golf': {
+        class:[
+          {name:'Certificate of Registry',            expiry:'2026-03-10'},
+          {name:'Load Line Certificate',               expiry:'2026-06-14'},
+          {name:'Safety Equipment Certificate',        expiry:'2027-03-20'},
+          {name:'Safety Radio Certificate',            expiry:'2026-09-22'},
+          {name:'Safety Construction Certificate',     expiry:'2027-01-10'},
+          {name:'Tonnage Certificate',                 expiry:'2030-04-01'},
+          {name:'IOPP Certificate',                    expiry:'2026-08-30'},
+          {name:'Safety Management Certificate (SMC)', expiry:'2026-12-05'},
+        ],
+        hcl:[
+          {name:'Hull & Machinery Insurance Cert',         expiry:'2026-09-30'},
+          {name:'Bunker Convention Certificate (BUNC)',     expiry:'2026-09-30'},
+          {name:'Civil Liability Certificate (CLC)',        expiry:'2026-09-30'},
+        ],
+        radio:[
+          {name:'GMDSS Radio Survey',                 expiry:'2026-07-18'},
+          {name:'VHF Radio Annual Service',           expiry:'2026-03-25'},
+          {name:'EPIRB Annual Service',               expiry:'2026-05-08'},
+          {name:'Life Raft Annual Service',           expiry:'2026-06-25'},
+          {name:'Lifeboat / Rescue Boat Annual Svc',  expiry:'2026-08-14'},
+          {name:'Fire Extinguisher Service',          expiry:'2026-11-01'},
+          {name:'Fire Detection System Service',      expiry:'2026-09-20'},
+          {name:'LSA FFE General Inspection',         expiry:'2026-12-10'},
+        ],
+        insurance:[
+          {name:'P&I Insurance (Protection & Indemnity)', expiry:'2027-02-20'},
+          {name:'H&M Insurance (Hull & Machinery)',        expiry:'2027-02-20'},
+          {name:'MLC Certificate',                        expiry:'2026-10-14'},
+        ],
+      },
+    };
+    ['SG Ekam','SG Naav','SG Dve','SG Trinee','SG Chatur','SG Panch','SG Sapta','SG Ashta',
+     'Vayu 1','Vayu 2','SG Rhine',
+     'SG Galaxy','SG Brave','SG Fortune','SG Justice','SG Patience','SG Loyalty',
+     'SG Generous','SG Integrity','SG Dhalia','SG Sunflower','SG Jasmine','SG Marigold'].forEach(b=>{
+      CERT_DATA[b]={
+        class:[
+          {name:'Certificate of Registry',            expiry:'2026-03-12'},
+          {name:'Load Line Certificate',               expiry:'2026-07-22'},
+          {name:'Safety Equipment Certificate',        expiry:'2027-02-15'},
+          {name:'Safety Radio Certificate',            expiry:'2026-11-30'},
+          {name:'Safety Construction Certificate',     expiry:'2027-04-18'},
+          {name:'Tonnage Certificate',                 expiry:'2031-01-01'},
+          {name:'IOPP Certificate',                    expiry:'2026-09-14'},
+          {name:'Safety Management Certificate (SMC)', expiry:'2026-06-01'},
+          {name:'ISPS Certificate',                    expiry:'2026-08-19'},
+        ],
+        hcl:[
+          {name:'Hull & Machinery Insurance Cert',         expiry:'2026-09-30'},
+          {name:'Bunker Convention Certificate (BUNC)',     expiry:'2026-09-30'},
+          {name:'Civil Liability Certificate (CLC)',        expiry:'2026-09-30'},
+        ],
+        radio:[
+          {name:'GMDSS Radio Survey',                 expiry:'2026-05-30'},
+          {name:'VHF Radio Annual Service',           expiry:'2026-09-10'},
+          {name:'EPIRB Annual Service',               expiry:'2026-03-20'},
+          {name:'Life Raft Annual Service',           expiry:'2026-07-05'},
+          {name:'Lifeboat / Rescue Boat Annual Svc',  expiry:'2026-10-22'},
+          {name:'Fire Extinguisher Service',          expiry:'2026-08-15'},
+          {name:'Fire Detection System Service',      expiry:'2026-12-01'},
+          {name:'LSA FFE General Inspection',         expiry:'2027-01-08'},
+        ],
+        insurance:[
+          {name:'P&I Insurance (Protection & Indemnity)', expiry:'2027-02-20'},
+          {name:'H&M Insurance (Hull & Machinery)',        expiry:'2027-02-20'},
+          {name:'MLC Certificate',                        expiry:'2026-11-05'},
+        ],
+      };
+    });
+
+    function certDaysLeft(s){
+      const t=new Date(); t.setHours(0,0,0,0);
+      return Math.round((new Date(s)-t)/86400000);
+    }
+    function certFmtDate(s){
+      return new Date(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    }
+    function certViewBtn(name, boat, expiry, cat){
+      const safe=name.replace(/'/g,'\\\'');
+      return `<span class="cert-view-btn"><span onclick="openCertDoc('${safe}','${boat}','${expiry}','${cat}')">View</span></span>`;
+    }
+    function certGridHead(col1='Certificate'){
+      return `<div class="cert-grid-head">
+        <span>${col1}</span><span></span>
+        <span>Expiry Date</span><span>Renewal Window</span><span></span>
+      </div>`;
+    }
+    function certGridRow(name, expiry, boat, cat){
+      const days=certDaysLeft(expiry);
+      return `<div class="cert-grid-row">
+        <span class="cert-name">${name}</span>
+        <span class="cert-gap"></span>
+        <span class="cert-expiry">${certFmtDate(expiry)}</span>
+        <span class="cert-window">—</span>
+        ${certViewBtn(name, boat, expiry, cat)}
+      </div>`;
+    }
+
+    // ── OV_BANDS ────────────────────────────────────────────
+    const OV_BANDS=[
+      {id:'exp', label:'Expired',     color:'#950606', bg:'#1E0808', border:'#5A1010', fn:d=>d<0},
+      {id:'d10', label:'< 10 days',   color:'#950606', bg:'#0E1A28', border:'#1E3248', fn:d=>d>=0&&d<10},
+      {id:'d30', label:'< 30 days',   color:'#E07830', bg:'#0E1A28', border:'#1E3248', fn:d=>d>=10&&d<30},
+      {id:'d90', label:'30 – 90 days',color:'#FFFFFF', bg:'#0E1A28', border:'#1E3248', fn:d=>d>=30&&d<90},
+      {id:'ok',  label:'Valid',       color:'#2AAA6A', bg:'#071E10', border:'#0A4020', fn:d=>d>=90},
+    ];
+    // all boats in display order
+    const ALL_BOATS=Object.keys(CERT_DATA);
+    function allCerts(data){return [...data.class,...data.hcl,...data.radio,...data.insurance];}
+
+    function certSelectCompany(co){
+      ['clp-tab','sc-tab','sgs-tab'].forEach(id=>{
+        const el=document.getElementById(id);
+        el.style.borderLeftColor='transparent';
+        el.style.background='transparent';
+      });
+      const map={compliance:'clp-tab',seacabbie:'sc-tab',sgshipping:'sgs-tab'};
+      const a=document.getElementById(map[co]);
+      a.style.borderLeftColor='#3A8FBF';
+      a.style.background='rgba(58,143,191,0.09)';
+
+      const scOpen=co==='seacabbie';
+      const sgsOpen=co==='sgshipping';
+      document.getElementById('sc-boats').style.display=scOpen?'block':'none';
+      document.getElementById('sgs-boats').style.display=sgsOpen?'block':'none';
+      document.getElementById('sc-arrow').textContent=scOpen?'▼':'▶';
+      document.getElementById('sgs-arrow').textContent=sgsOpen?'▼':'▶';
+
+      document.querySelectorAll('.cert-boat-item').forEach(el=>el.classList.remove('active'));
+      certActiveBoat=null;
+
+      if(co==='compliance'){
+        document.getElementById('certs-boat-title').textContent='Compliance Overview';
+        document.getElementById('cert-subtabs').style.display='none';
+        ['class','hcl','radio','insurance'].forEach(t=>document.getElementById('cert-panel-'+t).style.display='none');
+        certRenderCompliance();
+      } else {
+        document.getElementById('cert-panel-compliance').style.display='none';
+        document.getElementById('certs-boat-title').textContent='Select a vessel';
+        document.getElementById('cert-subtabs').style.display='none';
+        ['class','hcl','radio','insurance'].forEach(t=>{
+          document.getElementById('cert-panel-'+t).style.display='none';
+          document.getElementById('cert-panel-'+t).innerHTML='';
+        });
+      }
+    }
+
+    function certSelectBoat(boat, el){
+      certActiveBoat=boat;
+      document.querySelectorAll('.cert-boat-item').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('certs-boat-title').textContent=boat;
+      document.getElementById('cert-panel-compliance').style.display='none';
+      document.getElementById('cert-subtabs').style.display='flex';
+      certSwitchTab(certActiveTab);
+    }
+
+    function certSwitchTab(tab){
+      certActiveTab=tab;
+      ['class','hcl','radio','insurance'].forEach(t=>{
+        document.getElementById('ctab-'+t).classList.toggle('on',t===tab);
+        document.getElementById('cert-panel-'+t).style.display=t===tab?'block':'none';
+      });
+      if(!certActiveBoat) return;
+      const data=CERT_DATA[certActiveBoat]; if(!data) return;
+      if(tab==='class'){
+        const el=document.getElementById('cert-panel-class');
+        let h=`<div class="cert-section-head">Class Certification — ${certActiveBoat}</div>`;
+        h+=certGridHead();
+        data.class.forEach(c=>{h+=certGridRow(c.name,c.expiry,certActiveBoat,'Class');});
+        el.innerHTML=h;
+      }
+      if(tab==='hcl'){
+        const el=document.getElementById('cert-panel-hcl');
+        let h=`<div class="cert-section-head">HCL Certificates — ${certActiveBoat}</div>`;
+        h+=certGridHead();
+        data.hcl.forEach(c=>{h+=certGridRow(c.name,c.expiry,certActiveBoat,'HCL');});
+        el.innerHTML=h;
+      }
+      if(tab==='radio'){
+        const el=document.getElementById('cert-panel-radio');
+        let h=`<div class="cert-section-head">Radio &amp; LSA FFE — ${certActiveBoat}</div>`;
+        h+=certGridHead('Item');
+        data.radio.forEach(c=>{h+=certGridRow(c.name,c.expiry,certActiveBoat,'Radio & LSA FFE');});
+        el.innerHTML=h;
+      }
+      if(tab==='insurance'){
+        const el=document.getElementById('cert-panel-insurance');
+        let h=`<div class="cert-section-head">Insurance — ${certActiveBoat}</div>`;
+        h+=certGridHead();
+        data.insurance.forEach(c=>{h+=certGridRow(c.name,c.expiry,certActiveBoat,'Insurance');});
+        el.innerHTML=h;
+      }
+    }
+
+    function certRenderCompliance(){
+      const panel=document.getElementById('cert-panel-compliance');
+      // build counts
+      const counts={};
+      OV_BANDS.forEach(b=>{counts[b.id]=0;});
+      ALL_BOATS.forEach(boat=>{
+        allCerts(CERT_DATA[boat]).forEach(c=>{
+          const d=certDaysLeft(c.expiry);
+          OV_BANDS.forEach(b=>{if(b.fn(d))counts[b.id]++;});
+        });
+      });
+      // summary cards
+      let cards=`<div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">`;
+      OV_BANDS.forEach(b=>{
+        const active=certOvBand===b.id;
+        cards+=`<div onclick="certToggleBand('${b.id}')" style="flex:1;min-width:90px;background:${b.bg};border:1px solid ${active?b.color:b.border};border-radius:8px;padding:12px 10px;text-align:center;cursor:pointer;transition:border 0.15s">
+          <div style="font-size:22px;font-weight:700;color:${b.color}">${counts[b.id]}</div>
+          <div style="font-size:9px;font-weight:700;color:${b.color};margin-top:2px;text-transform:uppercase;letter-spacing:0.08em">${b.label}</div>
+        </div>`;
+      });
+      cards+=`</div>`;
+
+      // vessel blocks for active band
+      const band=OV_BANDS.find(b=>b.id===certOvBand);
+      let blocks='';
+      ALL_BOATS.forEach((boat,bi)=>{
+        const certs=allCerts(CERT_DATA[boat]).filter(c=>band.fn(certDaysLeft(c.expiry)));
+        if(!certs.length) return;
+        const vid=`ovv${bi}`;
+        blocks+=`<div class="vessel-box" id="${vid}-box" onclick="certToggleVessel('${vid}')">
+          <span class="vname">${boat}</span>
+          <span class="vcnt">${certs.length} cert${certs.length!==1?'s':''}</span>
+          <span class="vtoggle">▶</span>
+        </div>
+        <div class="ov-cert-list" id="${vid}-list">
+          ${certGridHead()}
+          ${certs.map(c=>certGridRow(c.name,c.expiry,boat,band.label)).join('')}
+        </div>`;
+      });
+      if(!blocks) blocks=`<div style="color:#4A6A8A;font-size:12px;text-align:center;margin-top:32px">No certificates in this category.</div>`;
+      panel.innerHTML=cards+blocks;
+      panel.style.display='block';
+    }
+
+    function certToggleBand(id){
+      certOvBand=id;
+      certRenderCompliance();
+    }
+    function certToggleVessel(vid){
+      const box=document.getElementById(vid+'-box');
+      const list=document.getElementById(vid+'-list');
+      const open=list.classList.toggle('open');
+      box.classList.toggle('expanded',open);
+    }
+
+    function openCertDoc(name, boat, expiry, cat){
+      document.getElementById('certDocTitle').textContent=name;
+      document.getElementById('certDocSub').textContent=`${boat}  ·  Expires ${certFmtDate(expiry)}`;
+      document.getElementById('certDocCategory').textContent=cat||'Certificate';
+      document.getElementById('certDocOverlay').style.display='flex';
+    }
+    function closeCertDoc(){
+      document.getElementById('certDocOverlay').style.display='none';
+    }
+
+    // Auto-show compliance overview when the cert module is first opened
+    const _origSwitchModule=switchModule;
+    function switchModule(mod){
+      _origSwitchModule(mod);
+      if(mod==='certs' && !certActiveBoat){
+        certSelectCompany('compliance');
+      }
     }
   </script>
 </head>
@@ -1015,6 +1326,9 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         <div class="btab on" style="padding:5px 12px;font-size:11px;border-radius:4px 4px 0 0;color:#FFFFFF;font-weight:500;background:#0D2A1A;border-bottom:2px solid #1A9A5A">All vessels</div>
       </div>
     </div>
+    <div id="tab-certs" onclick="switchModule('certs')" style="padding:5px 10px 0;margin-top:5px;border:1px solid #2A6A9A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
+      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Certification</div>
+    </div>
   </div>
 
   <div style="flex:1;display:flex;overflow:hidden">
@@ -1042,6 +1356,89 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     <div id="module-boatspecs" style="flex:1;display:none;flex-direction:column;overflow:hidden">
       <div id="v-boatspecs" style="flex:1;display:flex;overflow:hidden"></div>
     </div>
+
+    <!-- ── CERTIFICATION MODULE ── -->
+    <div id="module-certs" style="flex:1;display:none;overflow:hidden">
+      <!-- Left Panel -->
+      <div style="width:230px;min-width:230px;border-right:1px solid #1E3A5F;background:#0D1F3C;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:12px 14px 10px;border-bottom:1px solid #1E3A5F;flex-shrink:0">
+          <div style="font-size:9px;font-weight:700;color:#5A9EC8;letter-spacing:0.12em;text-transform:uppercase">Certificate Registry</div>
+        </div>
+        <div style="overflow-y:auto;flex:1;padding:8px 0">
+          <!-- Compliance Overview -->
+          <div id="clp-tab" onclick="certSelectCompany('compliance')"
+            style="display:flex;align-items:center;padding:10px 14px;cursor:pointer;border-left:3px solid transparent;transition:background 0.15s"
+            onmouseover="this.style.background='rgba(58,143,191,0.07)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:12px;font-weight:600;color:#FFFFFF">Compliance Overview</span>
+          </div>
+          <!-- Sea Cabbie -->
+          <div style="margin-top:4px">
+            <div id="sc-tab" onclick="certSelectCompany('seacabbie')"
+              style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;border-left:3px solid transparent;transition:background 0.15s"
+              onmouseover="this.style.background='rgba(58,143,191,0.07)'" onmouseout="this.style.background='transparent'">
+              <span style="font-size:12px;font-weight:600;color:#FFFFFF">Sea Cabbie Certs</span>
+              <span id="sc-arrow" style="font-size:10px;color:#6A8AAA">▶</span>
+            </div>
+            <div id="sc-boats" style="display:none;padding:2px 0 6px 24px">
+              <div onclick="certSelectBoat('SG Ekam',this)" class="cert-boat-item">SG Ekam</div>
+              <div onclick="certSelectBoat('SG Naav',this)" class="cert-boat-item">SG Naav</div>
+              <div onclick="certSelectBoat('SG Dve',this)" class="cert-boat-item">SG Dve</div>
+              <div onclick="certSelectBoat('SG Trinee',this)" class="cert-boat-item">SG Trinee</div>
+              <div onclick="certSelectBoat('SG Chatur',this)" class="cert-boat-item">SG Chatur</div>
+              <div onclick="certSelectBoat('SG Panch',this)" class="cert-boat-item">SG Panch</div>
+              <div onclick="certSelectBoat('SG Sapta',this)" class="cert-boat-item">SG Sapta</div>
+              <div onclick="certSelectBoat('SG Ashta',this)" class="cert-boat-item">SG Ashta</div>
+              <div onclick="certSelectBoat('Vayu 1',this)" class="cert-boat-item">Vayu 1</div>
+              <div onclick="certSelectBoat('Vayu 2',this)" class="cert-boat-item">Vayu 2</div>
+              <div onclick="certSelectBoat('SG Rhine',this)" class="cert-boat-item">SG Rhine</div>
+              <div onclick="certSelectBoat('KM Golf',this)" class="cert-boat-item">KM Golf</div>
+            </div>
+          </div>
+          <!-- SG Shipping -->
+          <div style="margin-top:4px">
+            <div id="sgs-tab" onclick="certSelectCompany('sgshipping')"
+              style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;border-left:3px solid transparent;transition:background 0.15s"
+              onmouseover="this.style.background='rgba(58,143,191,0.07)'" onmouseout="this.style.background='transparent'">
+              <span style="font-size:12px;font-weight:600;color:#FFFFFF">SG Shipping Certs</span>
+              <span id="sgs-arrow" style="font-size:10px;color:#6A8AAA">▶</span>
+            </div>
+            <div id="sgs-boats" style="display:none;padding:2px 0 6px 24px">
+              <div onclick="certSelectBoat('SG Galaxy',this)" class="cert-boat-item">SG Galaxy</div>
+              <div onclick="certSelectBoat('SG Brave',this)" class="cert-boat-item">SG Brave</div>
+              <div onclick="certSelectBoat('SG Fortune',this)" class="cert-boat-item">SG Fortune</div>
+              <div onclick="certSelectBoat('SG Justice',this)" class="cert-boat-item">SG Justice</div>
+              <div onclick="certSelectBoat('SG Patience',this)" class="cert-boat-item">SG Patience</div>
+              <div onclick="certSelectBoat('SG Loyalty',this)" class="cert-boat-item">SG Loyalty</div>
+              <div onclick="certSelectBoat('SG Generous',this)" class="cert-boat-item">SG Generous</div>
+              <div onclick="certSelectBoat('SG Integrity',this)" class="cert-boat-item">SG Integrity</div>
+              <div onclick="certSelectBoat('SG Dhalia',this)" class="cert-boat-item">SG Dhalia</div>
+              <div onclick="certSelectBoat('SG Sunflower',this)" class="cert-boat-item">SG Sunflower</div>
+              <div onclick="certSelectBoat('SG Jasmine',this)" class="cert-boat-item">SG Jasmine</div>
+              <div onclick="certSelectBoat('SG Marigold',this)" class="cert-boat-item">SG Marigold</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Right Panel -->
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:12px 20px 0;border-bottom:1px solid #1E3A5F;flex-shrink:0;background:#080F1E">
+          <div id="certs-boat-title" style="font-size:14px;font-weight:700;color:#FFFFFF;margin-bottom:10px">Compliance Overview</div>
+          <div id="cert-subtabs" style="display:none;gap:4px">
+            <div class="ctab on" id="ctab-class"    onclick="certSwitchTab('class')"    style="padding:7px 16px;font-size:11px;border-radius:6px 6px 0 0">Class Certification</div>
+            <div class="ctab"    id="ctab-hcl"       onclick="certSwitchTab('hcl')"       style="padding:7px 16px;font-size:11px;border-radius:6px 6px 0 0">HCL</div>
+            <div class="ctab"    id="ctab-radio"     onclick="certSwitchTab('radio')"     style="padding:7px 16px;font-size:11px;border-radius:6px 6px 0 0">Radio &amp; LSA FFE</div>
+            <div class="ctab"    id="ctab-insurance" onclick="certSwitchTab('insurance')" style="padding:7px 16px;font-size:11px;border-radius:6px 6px 0 0">Insurance</div>
+          </div>
+        </div>
+        <div id="certs-right-body" style="flex:1;overflow-y:auto;padding:18px 20px">
+          <div id="cert-panel-compliance"></div>
+          <div id="cert-panel-class"     style="display:none"></div>
+          <div id="cert-panel-hcl"       style="display:none"></div>
+          <div id="cert-panel-radio"     style="display:none"></div>
+          <div id="cert-panel-insurance" style="display:none"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1065,6 +1462,40 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       </div>
       <div onclick="closeModal()" onmouseover="this.style.color='#FFFFFF';this.style.borderColor='#2A4A5A'" onmouseout="this.style.color='#8AA8C0';this.style.borderColor='#1E3A5F'"
         style="padding:8px 16px;border-radius:6px;background:transparent;border:1px solid #1E3A5F;color:#8AA8C0;font-size:11px;cursor:pointer">Close</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CERTIFICATE DOC POPUP ── -->
+<div id="certDocOverlay" onclick="if(event.target===this)closeCertDoc()"
+  style="position:fixed;inset:0;background:rgba(4,10,24,0.92);display:none;align-items:center;justify-content:center;z-index:200">
+  <div style="background:#0D1F3C;border:1px solid #2A5A7A;border-radius:12px;width:560px;max-width:94%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid #1E3A5F;flex-shrink:0">
+      <div>
+        <div id="certDocTitle" style="font-size:13px;font-weight:700;color:#FFFFFF"></div>
+        <div id="certDocSub"   style="font-size:10px;color:#8AA8C0;margin-top:3px"></div>
+        <div id="certDocCategory" style="display:inline-block;margin-top:6px;padding:2px 9px;background:#0D2A3A;border:0.5px solid #2A5A7A;border-radius:4px;font-size:9px;font-weight:700;color:#5AB8E8;letter-spacing:0.1em;text-transform:uppercase">Certificate</div>
+      </div>
+      <button onclick="closeCertDoc()" style="background:none;border:none;color:#6A8AAA;font-size:20px;cursor:pointer;line-height:1;padding:0 0 0 12px"
+        onmouseover="this.style.color='#FFF'" onmouseout="this.style.color='#6A8AAA'">&#x2715;</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:260px">
+      <div style="width:100%;background:#06101E;border:1px dashed #1E3A5F;border-radius:8px;min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center">
+        <div style="font-size:44px;margin-bottom:14px">📄</div>
+        <div style="font-size:13px;font-weight:600;color:#4A7AA0;margin-bottom:6px">Certificate document will appear here</div>
+        <div style="font-size:11px;color:#3A5A78;line-height:1.7">Upload the certificate file to display it in this viewer.<br>Supported formats: PDF · JPG · PNG</div>
+        <div style="margin-top:18px;padding:8px 20px;background:#0E2030;border:0.5px solid #2A4A6A;border-radius:6px;font-size:10px;color:#4A7A9A;cursor:pointer">
+          + Upload certificate file
+        </div>
+      </div>
+    </div>
+    <div style="padding:11px 18px;border-top:1px solid #1E3A5F;flex-shrink:0;display:flex;gap:8px">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 0;border-radius:6px;background:#0D2A3A;border:1px solid #2A6A9A;color:#5AB8E8;font-size:11px;font-weight:600;cursor:pointer"
+        onmouseover="this.style.background='#102E42'" onmouseout="this.style.background='#0D2A3A'">
+        &#8659;&nbsp;Download Certificate
+      </div>
+      <div onclick="closeCertDoc()" style="padding:8px 18px;border-radius:6px;background:transparent;border:1px solid #1E3A5F;color:#8AA8C0;font-size:11px;cursor:pointer"
+        onmouseover="this.style.color='#FFFFFF'" onmouseout="this.style.color='#8AA8C0'">Close</div>
     </div>
   </div>
 </div>
