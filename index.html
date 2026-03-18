@@ -755,8 +755,30 @@ select option { background:#0D1F3C;color:#FFFFFF; }
     }
 
 
-    function renderBoatSpecs(){
+    const BOAT_SPECS_URL = 'https://abnv5.app.n8n.cloud/webhook/boat-specs';
+    let _bsLoaded = false;
+
+    async function loadBoatSpecs(){
+      if (_bsLoaded) return;
+      try {
+        const res = await fetch(BOAT_SPECS_URL);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (data && typeof data === 'object') {
+          // Merge fetched data into BOAT_SPECS
+          Object.assign(BOAT_SPECS, data);
+          _bsLoaded = true;
+        }
+      } catch(e) {
+        console.warn('Boat specs fetch failed, using cached data:', e.message);
+      }
+    }
+
+    async function renderBoatSpecs(){
       const wrap=document.getElementById('v-boatspecs');
+      // Show loading state
+      wrap.innerHTML='<div style="padding:20px;color:#8AA8C0;font-size:12px">Loading specs...</div>';
+      await loadBoatSpecs();
       let sb=`<div style="width:185px;min-width:185px;border-right:1px solid #1E3A5F;background:#0D1F3C;overflow-y:auto;display:flex;flex-direction:column">`;
       sb+=bsSidebarGroup('SG Shipping',BS_SG,'sg');
       sb+=bsSidebarGroup('Sea Cabbie',BS_SC,'sc');
