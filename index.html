@@ -421,12 +421,6 @@ select option { background:#0D1F3C;color:#FFFFFF; }
     
     
 
-    function switchModule(mod){
-      activeModule=mod;
-      document.getElementById('module-daily').style.display=mod==='daily'?'flex':'none';
-      document.getElementById('module-runhrs').style.display=mod==='runhrs'?'flex':'none';
-      updateNavStyles();renderAll();
-    }
     function switchDailyView(view,el){
       activeView=view;
       document.querySelectorAll('.ttab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
@@ -448,20 +442,6 @@ select option { background:#0D1F3C;color:#FFFFFF; }
     const BS_SC = ['SG Ekam','SG Naav','SG Dve','KM Golf','SG Panch','SG Chatur','SG Sapta','SG Ashta','SG Trinee','Vayu 1','Vayu 2'];
     let bsSelected = 'SG Galaxy';
     let bsOpenSG = true, bsOpenSC = true;
-
-    function renderBoatSpecs(){
-      const wrap = document.getElementById('v-boatspecs');
-      // sidebar
-      let sidebar = `<div style="width:185px;min-width:185px;border-right:1px solid #1E3A5F;background:#0D1F3C;overflow-y:auto;display:flex;flex-direction:column">`;
-      sidebar += bsSidebarGroup('SG Shipping', BS_SG, 'sg');
-      sidebar += bsSidebarGroup('Sea Cabbie', BS_SC, 'sc');
-      sidebar += `</div>`;
-      // detail
-      const detail = `<div id="bs-detail" style="flex:1;overflow-y:auto;padding:20px 24px">${bsDetailHTML(bsSelected)}</div>`;
-      wrap.innerHTML = sidebar + detail;
-    }
-
-
 
 
 
