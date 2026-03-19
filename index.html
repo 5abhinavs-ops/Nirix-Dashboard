@@ -1247,6 +1247,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         if(!certs.length) return;
         const vid=`ovv${bi}`;
         blocks+=`<div class="vessel-box" id="${vid}-box" onclick="certToggleVessel('${vid}')">
+          <span style="flex-shrink:0;width:9px;height:9px;border-radius:50%;background:${band.color};box-shadow:0 0 6px ${band.color}"></span>
           <span class="vname">${boat}</span>
           <span class="vcnt">${certs.length} cert${certs.length!==1?'s':''}</span>
           <span class="vtoggle">▶</span>
