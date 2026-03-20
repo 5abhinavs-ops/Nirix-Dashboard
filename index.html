@@ -86,7 +86,6 @@ select option { background:#0D1F3C;color:#FFFFFF; }
 
 /* FLEET MODULE LAYOUT */
 #module-fleet {
-  display: flex !important;
   flex-direction: row !important;
   flex: 1 !important;
   min-height: 0 !important;
@@ -2638,17 +2637,6 @@ function fb_drawPieChart(cats, total){
 
 
 
-    function switchModule(mod){
-      activeModule = mod;
-      ['daily','runhrs','boatspecs','certs','fleet'].forEach(function(m){
-        var tab = document.getElementById('tab-'+m);
-        var el  = document.getElementById('module-'+m);
-        if(tab) tab.style.opacity = (m===mod) ? '1' : '0.55';
-        if(el)  el.style.display  = (m===mod) ? 'flex' : 'none';
-      });
-      if(mod === 'fleet') { if(window.initFleetModule) window.initFleetModule(); }
-      else renderAll();
-    }
 
 
 
