@@ -75,7 +75,7 @@ select option { background:#0D1F3C;color:#FFFFFF; }
   
 
 
-/* ── FLEET CSS ── */
+/* -- FLEET CSS -- */
 
 #module-fleet{
   --bg:#f5f6fa;--white:#fff;--border:#dee2e6;--border-dark:#c8cdd5;
@@ -349,7 +349,7 @@ select option { background:#0D1F3C;color:#FFFFFF; }
 
 
 /* FLEET LAYOUT OVERRIDE */
-#module-fleet{flex-direction:row!important;flex:1!important;overflow:hidden!important;position:relative!important;min-height:0!important;}
+#module-fleet{flex-direction:row!important;overflow:hidden!important;position:relative!important;min-height:0!important;}
 #module-fleet .hdr{display:none!important;}
 #module-fleet #left-nav{position:relative!important;top:auto!important;left:auto!important;bottom:auto!important;width:180px!important;flex-shrink:0!important;height:100%!important;overflow-y:auto!important;display:flex!important;flex-direction:column!important;}
 #module-fleet .main-content{flex:1!important;margin-left:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;min-height:0!important;min-width:0!important;position:relative!important;}
@@ -375,7 +375,7 @@ select option { background:#0D1F3C;color:#FFFFFF; }
 #module-fleet.emode .cell.sN .fh{opacity:0!important;pointer-events:none!important;}
 #module-fleet #analytics-overlay{position:absolute!important;top:0!important;left:0!important;right:0!important;bottom:0!important;}
 
-/* ── END FLEET CSS ── */
+/* -- END FLEET CSS -- */
 
 </style>
   <script>
@@ -2575,7 +2575,7 @@ function fb_drawPieChart(cats, total){
     }
 
 
-/* ── FLEET JS ── */
+/* -- FLEET JS -- */
 (function(){
 'use strict';
 
@@ -3464,7 +3464,7 @@ var _undoStack=[];
 window.undoLast=function(){
   if(!_undoStack.length){
     var b=document.getElementById('sp-undo');
-    if(b){b.textContent='Nothing to undo';setTimeout(function(){b.textContent='↩ Undo last';},1200);}
+    if(b){b.textContent='Nothing to undo';setTimeout(function(){b.textContent='Undo last';},1200);}
     return;
   }
   var en=_undoStack.pop(),el=en.el; if(!el)return;
@@ -3475,7 +3475,7 @@ window.undoLast=function(){
   if(en.wasEdited){EDITS[ek]={s:en.oldS,r:en.oldR};}else{delete EDITS[ek];}
   if(typeof renderKPI==='function')renderKPI();
   var b=document.getElementById('sp-undo');
-  if(b){b.textContent='✓ Undone!';setTimeout(function(){b.textContent='↩ Undo last';},1000);}
+  if(b){b.textContent='Undone!';setTimeout(function(){b.textContent='Undo last';},1000);}
 };
 window.commitCell=commitCell=function(el,s,r){
   var ek=el.dataset.k+'|'+el.dataset.sr+'|'+el.dataset.d+'|'+el.dataset.si;
@@ -3484,7 +3484,7 @@ window.commitCell=commitCell=function(el,s,r){
   applyStatusToCell(el,s,r); el.classList.add('edited'); EDITS[ek]={s:s,r:r};
 };
 
-// Drag + localStorage
+// Drag + localStorage for popup position
 (function(){
   var K='fleet_popup_pos',_e=null,_ox=0,_oy=0;
   function sv(l,t){try{localStorage.setItem(K,JSON.stringify({left:l,top:t}));}catch(e){}}
@@ -3509,7 +3509,7 @@ window.commitCell=commitCell=function(el,s,r){
   });
 })();
 
-// pickStatus with N
+// pickStatus with N (revert/clear)
 window.pickStatus=pickStatus=function(s){
   pkStatus=s;
   ['A','M','S','P','W','N'].forEach(function(x){
@@ -3555,18 +3555,18 @@ window.closePicker=closePicker=function(){
   document.getElementById('sp-footer').style.display='none';
 };
 
-// toggleEdit targets module-fleet
+// toggleEdit targets module-fleet div
 window.toggleEdit=toggleEdit=function(){
   emode=!emode;
   document.getElementById('module-fleet').classList.toggle('emode',emode);
   var btn=document.getElementById('btn-edit');
   btn.classList.toggle('edit-on',emode);
-  btn.textContent=emode?'✕ Exit Edit Mode':'✎ Edit Mode';
+  btn.textContent=emode?'Exit Edit Mode':'Edit Mode';
   document.getElementById('edit-chip').classList.toggle('on',emode);
   if(!emode){closePicker(); clearActivePaint();}
 };
 
-// init
+// init -- called once when Fleet tab is first opened
 window.initFleetModule=function(){
   if(window._fbInited)return; window._fbInited=true;
   try{
@@ -3580,7 +3580,7 @@ window.initFleetModule=function(){
 };
 
 })();
-/* ── END FLEET JS ── */
+/* -- END FLEET JS -- */
 
 </script>
 </head>
@@ -3598,7 +3598,7 @@ window.initFleetModule=function(){
   </div>
 </div>
 
-<div id="app" style="display:none;flex-direction:column;min-height:100vh;background:#0A1628">
+<div id="app" style="display:none;flex-direction:column;height:100vh;background:#0A1628">
 
   <div id="header" style="display:flex;align-items:center;padding:10px 18px;background:#0D2A3A;border-bottom:1px solid #1E4A5A;flex-shrink:0;gap:12px">
 
@@ -3753,15 +3753,8 @@ window.initFleetModule=function(){
     </div>
 
     
-  </div>
-</div>
+  
 
-
-    
-    
-    
-
-    
     <!-- FLEET AVAILABILITY MODULE -->
     <div id="module-fleet" style="display:none;flex:1;min-height:0;overflow:hidden;">
 
@@ -3848,7 +3841,7 @@ window.initFleetModule=function(){
   </div>
   <div class="sp-footer" id="sp-footer" style="display:none">
     <button class="sp-apply" onclick="applyEdit()">✓ Apply colour</button>
-    <button class="sp-undo" onclick="undoLast()" id="sp-undo" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#c5cde8;border-radius:8px;padding:7px;font-size:12px;cursor:pointer;font-family:inherit;width:100%">↩ Undo last</button>
+    <button class="sp-undo" onclick="undoLast()" id="sp-undo" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#c5cde8;border-radius:8px;padding:7px;font-size:12px;cursor:pointer;font-family:inherit;width:100%">Undo last</button>
     <button class="sp-close" onclick="closePicker()">✕ Close</button>
   </div>
 </div>
@@ -4752,6 +4745,14 @@ function drawPieChart(cats, total){
 
 </script>
     </div>
+
+  </div>
+</div>
+
+
+    
+    
+    
 
     <div id="modalOverlay" onclick="if(event.target===this)closeModal()"
   style="position:fixed;inset:0;background:rgba(4,10,24,0.88);display:none;align-items:center;justify-content:center;z-index:100">
