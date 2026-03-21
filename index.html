@@ -368,6 +368,22 @@ select option { background:#0D1F3C;color:#FFFFFF; }
 #module-fleet .tt-r {font-size:11px;color:#c5cde8;line-height:1.4}
 #module-fleet .tt-h {font-size:10px;color:#ffc832;margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.08);display:none}
 
+/* ── SCI-FI GRID THEME OVERRIDES (applied via body.theme-scifi) ── */
+#module-fleet.theme-scifi .hdr-title { font-family:'Chakra Petch',monospace !important; letter-spacing:0.14em; color:#00f0ff !important; text-shadow:0 0 8px rgba(0,240,255,0.5); }
+#module-fleet.theme-scifi .hdr-sub { font-family:'Chakra Petch',monospace !important; letter-spacing:0.1em; }
+#module-fleet.theme-scifi .mtitle { font-family:'Chakra Petch',monospace !important; letter-spacing:0.1em; color:#00f0ff !important; }
+#module-fleet.theme-scifi .mbar { border-bottom-color:rgba(30,58,138,0.5) !important; }
+#module-fleet.theme-scifi #left-nav { border-right-color:rgba(30,58,138,0.4) !important; background:#06101e !important; }
+#module-fleet.theme-scifi .ln-lbl { font-family:'Chakra Petch',monospace !important; color:#00f0ff !important; letter-spacing:0.15em; }
+#module-fleet.theme-scifi .ln-btn { font-family:'Rajdhani',sans-serif !important; }
+#module-fleet.theme-scifi .ln-btn.active-scb { border-color:#00f0ff !important; color:#00f0ff !important; background:rgba(0,240,255,0.07) !important; text-shadow:0 0 6px rgba(0,240,255,0.4); }
+#module-fleet.theme-scifi .an-title, #module-fleet.theme-scifi .an-section-title { font-family:'Chakra Petch',monospace !important; letter-spacing:0.12em; color:#00f0ff !important; }
+#module-fleet.theme-scifi .thday { border-color:rgba(30,58,138,0.4) !important; }
+#module-fleet.theme-scifi .chip-green { color:#00f0ff !important; border-color:rgba(0,240,255,0.3) !important; background:rgba(0,240,255,0.07) !important; }
+#module-fleet.theme-scifi ::-webkit-scrollbar-track { background:#0a1122 !important; }
+#module-fleet.theme-scifi ::-webkit-scrollbar-thumb { background:#1e3a8a !important; }
+#module-fleet.theme-scifi ::-webkit-scrollbar-thumb:hover { background:#00f0ff !important; }
+
 /* ── CYBER INDIGO THEME OVERRIDES (applied via body.theme-cyber) ── */
 body.theme-cyber .hdr-title,
 #module-fleet.theme-cyber .hdr-sub { font-family:'Orbitron',sans-serif !important; letter-spacing:0.1em; }
@@ -1905,29 +1921,12 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         border: '#1E3A5F', accent: '#0D9AAA', text: '#FFFFFF',
         textMuted: '#8AA8C0', preview: ['#0A1628','#0D2A3A','#0D9AAA']
       },
-      'midnight-navy': {
-        name: 'Midnight Navy',
-        bg: '#060C18', nav: '#0A1830', surface: '#0A172A',
-        border: '#162A48', accent: '#3B82F6', text: '#FFFFFF',
-        textMuted: '#7A9ABB', preview: ['#060C18','#0A1830','#3B82F6']
-      },
-      'steel-slate': {
-        name: 'Steel Slate',
-        bg: '#0E1520', nav: '#151E2D', surface: '#151E2D',
-        border: '#252F42', accent: '#64748B', text: '#E8ECF4',
-        textMuted: '#7A8A9A', preview: ['#0E1520','#151E2D','#64748B']
-      },
-      'forest-dark': {
-        name: 'Forest Dark',
-        bg: '#071410', nav: '#0A1E18', surface: '#0A1E18',
-        border: '#133A2A', accent: '#10B981', text: '#FFFFFF',
-        textMuted: '#7ABBA8', preview: ['#071410','#0A1E18','#10B981']
-      },
-      'ember-dark': {
-        name: 'Ember Dark',
-        bg: '#130A06', nav: '#1E100A', surface: '#1A0E08',
-        border: '#3A1A0A', accent: '#F97316', text: '#FFFFFF',
-        textMuted: '#B89A7A', preview: ['#130A06','#1E100A','#F97316']
+
+      'scifi-grid': {
+        name: 'Sci-Fi Grid',
+        bg: '#030711', nav: '#080e1e', surface: '#0a1122',
+        border: '#1e3a8a', accent: '#00f0ff', text: '#FFFFFF',
+        textMuted: '#8fb1d6', preview: ['#030711','#0a1122','#00f0ff']
       },
       'cyber-indigo': {
         name: 'Cyber Indigo',
@@ -1960,6 +1959,125 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       // Update login screen too
       const ls = document.getElementById('loginScreen');
       if(ls) ls.style.background = t.bg;
+      // Sci-Fi Grid special treatment — Chakra Petch + grid pattern + scanline + corner brackets
+      if(themeId === 'scifi-grid'){
+        document.body.style.backgroundImage = [
+          'linear-gradient(to right, #0f172a 1px, transparent 1px)',
+          'linear-gradient(to bottom, #0f172a 1px, transparent 1px)',
+          'radial-gradient(circle at 50% 0%, rgba(0,240,255,0.12), transparent 55%)'
+        ].join(',');
+        document.body.style.backgroundSize = '40px 40px, 40px 40px, 100% 100%';
+        if(header){
+          header.style.boxShadow = '0 4px 20px rgba(0,0,0,0.6)';
+          header.style.borderBottomColor = 'rgba(30,58,138,0.6)';
+        }
+        if(!document.getElementById('scifi-style')){
+          // Load Chakra Petch font
+          const link=document.createElement('link');
+          link.rel='stylesheet';
+          link.href='https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Rajdhani:wght@400;500;600;700&display=swap';
+          document.head.appendChild(link);
+          // Inject scanline element
+          const scanEl=document.createElement('div');
+          scanEl.id='scifi-scanline';
+          scanEl.style.cssText='position:fixed;top:-100px;left:0;width:100%;height:100px;background:linear-gradient(0deg,rgba(0,240,255,0) 0%,rgba(0,240,255,0.04) 50%,rgba(0,240,255,0) 100%);pointer-events:none;z-index:9999;animation:scifi-scan 8s linear infinite;';
+          document.body.appendChild(scanEl);
+          const s=document.createElement('style');
+          s.id='scifi-style';
+          s.textContent=`
+            @keyframes scifi-scan { 0%{top:-100px} 100%{top:100%} }
+            body.theme-scifi, body.theme-scifi button, body.theme-scifi select, body.theme-scifi input {
+              font-family: 'Rajdhani', 'Segoe UI', sans-serif !important;
+              letter-spacing: 0.04em;
+            }
+            body.theme-scifi #module-nav > div > div:first-child,
+            body.theme-scifi .sp-popup-title,
+            body.theme-scifi .sp-section-label {
+              font-family: 'Chakra Petch', monospace !important;
+              text-transform: uppercase;
+              letter-spacing: 0.14em;
+            }
+            body.theme-scifi * { transition: border-color .2s, box-shadow .2s, background .2s; }
+            body.theme-scifi ::-webkit-scrollbar-track { background:#0a1122 !important; }
+            body.theme-scifi ::-webkit-scrollbar-thumb { background:#1e3a8a !important; }
+            body.theme-scifi ::-webkit-scrollbar-thumb:hover { background:#00f0ff !important; }
+            body.theme-scifi #header {
+              border-bottom: 1px solid rgba(30,58,138,0.6) !important;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
+            }
+            body.theme-scifi #module-nav {
+              border-bottom: 1px solid rgba(30,58,138,0.5) !important;
+            }
+            body.theme-scifi #module-nav > div {
+              border-color: rgba(30,58,138,0.5) !important;
+              clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+            }
+            body.theme-scifi #module-nav > div:hover {
+              border-color: rgba(0,240,255,0.35) !important;
+            }
+            body.theme-scifi .ttab.on, body.theme-scifi .stab.on {
+              border-bottom-color: #00f0ff !important;
+              color: #00f0ff !important;
+              text-shadow: 0 0 8px rgba(0,240,255,0.5);
+            }
+            body.theme-scifi .ttab:hover, body.theme-scifi .stab:hover { color: #00f0ff !important; }
+            body.theme-scifi #settings-btn {
+              border-color: rgba(0,240,255,0.3) !important;
+              box-shadow: 0 0 10px rgba(0,240,255,0.15) !important;
+            }
+            body.theme-scifi #settings-btn:hover {
+              border-color: #00f0ff !important;
+              box-shadow: 0 0 18px rgba(0,240,255,0.4) !important;
+            }
+            body.theme-scifi #settings-popup {
+              border-color: rgba(30,58,138,0.7) !important;
+              box-shadow: 0 16px 48px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,240,255,0.05) !important;
+            }
+            body.theme-scifi .sp-tab.active {
+              border-bottom-color: #00f0ff !important;
+              color: #00f0ff !important;
+              text-shadow: 0 0 6px rgba(0,240,255,0.4);
+            }
+            body.theme-scifi .sp-popup-title { color: #00f0ff !important; }
+            body.theme-scifi .sp-section-label { color: rgba(0,240,255,0.8) !important; }
+            body.theme-scifi .sp-theme-dropdown {
+              border-color: rgba(30,58,138,0.6) !important;
+              font-family: 'Chakra Petch', monospace !important;
+            }
+            body.theme-scifi .sp-theme-dropdown:hover { border-color: #00f0ff !important; }
+            /* Corner bracket accent on header boxes */
+            body.theme-scifi #header > div:last-child {
+              position: relative;
+              clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            }
+            body.theme-scifi #header > div:last-child::before {
+              content:'';
+              position:absolute;top:0;left:0;
+              width:8px;height:8px;
+              border-top:2px solid #00f0ff;
+              border-left:2px solid #00f0ff;
+              pointer-events:none;
+            }
+            body.theme-scifi #header > div:last-child::after {
+              content:'';
+              position:absolute;bottom:0;right:0;
+              width:8px;height:8px;
+              border-bottom:2px solid #00f0ff;
+              border-right:2px solid #00f0ff;
+              pointer-events:none;
+            }
+          `;
+          document.head.appendChild(s);
+        }
+        document.body.classList.add('theme-scifi');
+      } else {
+        // Clean up scifi-specific elements when switching away
+        const scanEl=document.getElementById('scifi-scanline');
+        if(scanEl) scanEl.remove();
+        document.body.style.backgroundSize = '';
+        document.body.classList.remove('theme-scifi');
+      }
+
       // Cyber Indigo special treatment — glow + glassmorphism body
       if(themeId === 'cyber-indigo'){
         document.body.style.backgroundImage = 'radial-gradient(circle at 50% 0%, #0d1240 0%, transparent 60%), radial-gradient(circle at 100% 50%, rgba(43,51,198,0.10) 0%, transparent 50%)';
@@ -3269,10 +3387,7 @@ window.initFleetModule=function(){
         <div class="sp-section-label">Dashboard Theme</div>
         <select class="sp-theme-dropdown" id="sp-theme-select" onchange="applyTheme(this.value)">
           <option value="ocean-dark">Ocean Dark (Default)</option>
-          <option value="midnight-navy">Midnight Navy</option>
-          <option value="steel-slate">Steel Slate</option>
-          <option value="forest-dark">Forest Dark</option>
-          <option value="ember-dark">Ember Dark</option>
+          <option value="scifi-grid">⬡ Sci-Fi Grid</option>
           <option value="cyber-indigo">⚡ Cyber Indigo</option>
         </select>
         <div class="sp-theme-preview" id="sp-theme-preview"></div>
