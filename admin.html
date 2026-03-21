@@ -137,12 +137,35 @@
     .badge-viewer  { background: rgba(90,120,160,0.15); color: #7A9AB0; border: 1px solid rgba(90,120,160,0.25); }
     .badge-vplus   { background: rgba(224,160,80,0.12); color: #E0A050; border: 1px solid rgba(224,160,80,0.25); }
     .badge-blocked { background: rgba(224,90,90,0.12);  color: #E05A5A; border: 1px solid rgba(224,90,90,0.25); }
+    .admin-tab-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    .admin-tab {
+      padding: 8px 14px; background: #0A1628; border: 1px solid #1E3A5F; border-radius: 6px; color: #8AA8C0;
+      cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600;
+    }
+    .admin-tab.active { background: #0D2A3A; color: #FFF; border-color: #0D9AAA; }
+    #perm-modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 10000;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    #perm-modal-overlay.open { display: flex; }
+    #perm-modal {
+      background: #0D1F3C; border: 1px solid #1E3A5F; border-radius: 12px; max-width: 720px; width: 100%;
+      max-height: 90vh; overflow: auto; padding: 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .perm-modal-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 14px; }
+    .perm-modal-table th, .perm-modal-table td { padding: 8px 6px; border-bottom: 1px solid #1A3050; text-align: left; vertical-align: middle; }
+    .perm-modal-table th { color: #5A7A9A; font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .perm-amber { color: #E0A050; font-size: 11px; margin-left: 4px; }
+    .filt-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 14px; font-size: 12px; }
+    .filt-row label { display: flex; flex-direction: column; gap: 4px; color: #8AA8C0; }
+    .filt-row input, .filt-row select { background: #0A1628; border: 1px solid #1E3A5F; border-radius: 6px; color: #FFF; padding: 6px 8px; font-family: inherit; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
   <script src="permissions.js"></script>
+  <script src="activity-log.js"></script>
 </head>
 <body>
   <div id="gate">Checking access…</div>
@@ -152,7 +175,15 @@
       <button type="button" class="btn-signout" id="btn-signout">Sign out</button>
     </header>
     <main>
+      <div class="admin-tab-bar">
+        <button type="button" class="admin-tab active" data-tab="overview">Overview</button>
+        <button type="button" class="admin-tab" data-tab="users">Users</button>
+        <button type="button" class="admin-tab" data-tab="permissions">User Permissions</button>
+        <button type="button" class="admin-tab" data-tab="activity">Activity Log</button>
+        <button type="button" class="admin-tab" data-tab="settings">Settings</button>
+      </div>
 
+      <div id="panel-overview" class="admin-panel">
       <!-- ── PERMISSIONS REFERENCE TABLE ── -->
       <div class="panel">
         <h2>Role permissions reference</h2>
@@ -309,10 +340,12 @@
           </table>
         </div>
         <div style="margin-top:12px;font-size:10px;color:#4A6A8A;line-height:1.6">
-          <span style="color:#E0A050;font-weight:600">Viewer+</span> — same as Viewer with optional extra permissions granted individually per user (editExpiry, upload). Configure in the Users table below.
+          <span style="color:#E0A050;font-weight:600">Viewer+</span> — same as Viewer with optional extra permissions granted individually per user (see User Permissions tab). Configure granular overrides in the Users table or User Permissions tab.
         </div>
       </div>
+      </div>
 
+      <div id="panel-users" class="admin-panel" style="display:none">
       <!-- ── ADD USER ── -->
       <div class="panel">
         <h2>Add user</h2>
@@ -353,10 +386,92 @@
         </div>
         <div id="users-err" class="err"></div>
       </div>
+      </div>
+
+      <div id="panel-permissions" class="admin-panel" style="display:none">
+        <div class="panel">
+          <h2>Select user</h2>
+          <select id="perm-user-sel" style="min-width:280px;margin-bottom:8px"></select>
+          <div style="font-size:11px;color:#5A7A9A">Choose a user to edit granular permission overrides (Default / Grant / Deny).</div>
+        </div>
+      </div>
+
+      <div id="panel-activity" class="admin-panel" style="display:none">
+        <div class="panel">
+          <h2>Activity log</h2>
+          <div class="filt-row">
+            <label>From <input type="date" id="act-from" /></label>
+            <label>To <input type="date" id="act-to" /></label>
+            <label>User
+              <select id="act-user"><option value="">All users</option></select>
+            </label>
+            <label>Type
+              <select id="act-type">
+                <option value="all">All</option>
+                <option value="login">Login / logout</option>
+                <option value="edits">Edits</option>
+                <option value="downloads">Downloads</option>
+              </select>
+            </label>
+            <button type="button" class="btn" id="act-apply">Apply filters</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date/time</th>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Action</th>
+                  <th>Detail</th>
+                </tr>
+              </thead>
+              <tbody id="activity-tbody"></tbody>
+            </table>
+          </div>
+          <div id="activity-err" class="err"></div>
+        </div>
+      </div>
+
+      <div id="panel-settings" class="admin-panel" style="display:none">
+        <div class="panel">
+          <h2>Session settings</h2>
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:8px">
+            <label style="font-size:12px;color:#8AA8C0;display:flex;align-items:center;gap:8px">
+              Auto-logout after inactivity
+              <input type="number" id="set-inactivity" min="5" max="480" value="30" style="width:70px;background:#0A1628;border:1px solid #1E3A5F;border-radius:6px;color:#FFF;padding:6px 8px;font-family:inherit" />
+              <span>minutes</span>
+            </label>
+            <button type="button" class="btn" id="btn-save-session">Save</button>
+          </div>
+          <div id="settings-msg" class="msg"></div>
+        </div>
+      </div>
     </main>
   </div>
 
+  <div id="perm-modal-overlay" onclick="if(event.target===this)closePermModal()">
+    <div id="perm-modal" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div>
+          <div id="perm-modal-title" style="font-size:16px;font-weight:700;color:#FFF">Permissions</div>
+          <div id="perm-modal-sub" style="font-size:12px;color:#8AA8C0;margin-top:4px"></div>
+        </div>
+        <button type="button" onclick="closePermModal()" style="background:transparent;border:none;color:#8AA8C0;font-size:20px;cursor:pointer;line-height:1">&times;</button>
+      </div>
+      <table class="perm-modal-table">
+        <thead><tr><th>Permission</th><th>Has it?</th><th>Override</th></tr></thead>
+        <tbody id="perm-modal-tbody"></tbody>
+      </table>
+      <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+        <button type="button" class="btn" id="perm-modal-save">Save</button>
+        <span id="perm-modal-saved" class="ok" style="display:none">Saved.</span>
+      </div>
+    </div>
+  </div>
+
   <script>
+    var _fbDb = null;
     let db = null;
     let secondaryApp = null;
 
@@ -388,6 +503,8 @@
       b.classList.toggle('on', blocked);
     }
 
+    var _adminUserDocs = [];
+
     async function loadUsers() {
       const tbody = document.getElementById('users-tbody');
       const errEl = document.getElementById('users-err');
@@ -395,14 +512,18 @@
       tbody.innerHTML = '';
       try {
         const snap = await db.collection('users').get();
+        _adminUserDocs = [];
         snap.forEach(function (doc) {
-          const u = doc.id;
-          const d = doc.data() || {};
+          _adminUserDocs.push({ id: doc.id, d: doc.data() || {} });
+        });
+        _adminUserDocs.forEach(function (rec) {
+          const u = rec.id;
+          const d = rec.d;
           const email = d.email || '—';
           const role = d.role || 'viewer';
           const ex = d.extraPermissions || {};
           const editEx = !!ex.editExpiry;
-          const upl = !!ex.upload;
+          const upl = !!(ex.uploadCert || ex.upload);
           const blocked = !!d.blocked;
           const tr = document.createElement('tr');
           tr.innerHTML =
@@ -414,7 +535,7 @@
             '</select></td>' +
             '<td>' +
             '<label class="chk"><input type="checkbox" class="ex-exp" data-uid="' + esc(u) + '"' + (editEx ? ' checked' : '') + '/> editExpiry</label>' +
-            '<label class="chk"><input type="checkbox" class="ex-up" data-uid="' + esc(u) + '"' + (upl ? ' checked' : '') + '/> upload</label>' +
+            '<label class="chk"><input type="checkbox" class="ex-up" data-uid="' + esc(u) + '"' + (upl ? ' checked' : '') + '/> uploadCert</label>' +
             '</td>' +
             '<td><span style="color:' + (blocked ? '#E05A5A' : '#5BC4A8') + '">' + (blocked ? 'Yes' : 'No') + '</span></td>' +
             '<td style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;border:none">' +
@@ -423,6 +544,21 @@
             '</td>';
           tbody.appendChild(tr);
         });
+
+        const ps = document.getElementById('perm-user-sel');
+        if (ps) {
+          const prev = ps.value;
+          ps.innerHTML = '<option value="">— Select user —</option>';
+          _adminUserDocs.forEach(function (rec) {
+            const email = rec.d.email || rec.id;
+            const role = rec.d.role || 'viewer';
+            const o = document.createElement('option');
+            o.value = rec.id;
+            o.textContent = '[' + role + '] ' + email;
+            ps.appendChild(o);
+          });
+          if (prev && Array.from(ps.options).some(function (o) { return o.value === prev; })) ps.value = prev;
+        }
 
         tbody.querySelectorAll('.btn-block').forEach(function (btn) {
           btn.addEventListener('click', function () {
@@ -458,9 +594,12 @@
       const upload = tr.querySelector('.ex-up').checked;
       const blocked = rowBlockedState(uid);
       try {
+        const existingSnap = await db.collection('users').doc(uid).get();
+        const existing = existingSnap.data() || {};
+        const prevEx = existing.extraPermissions || {};
         await db.collection('users').doc(uid).set({
           role: role,
-          extraPermissions: { editExpiry: editExpiry, upload: upload },
+          extraPermissions: Object.assign({}, prevEx, { editExpiry: editExpiry, uploadCert: upload }),
           blocked: blocked
         }, { merge: true });
         errEl.textContent = '';
@@ -493,7 +632,7 @@
         await db.collection('users').doc(cred.user.uid).set({
           email: email,
           role: role,
-          extraPermissions: { editExpiry: false, upload: false },
+          extraPermissions: { editExpiry: false, uploadCert: false },
           blocked: false,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -508,6 +647,266 @@
       }
     });
 
+    var PERM_KEYS = [
+      'editCertName', 'editExpiry', 'editRenewal', 'uploadCert',
+      'downloadCert', 'deleteCert', 'addCert',
+      'editRunHrs', 'editBoatSpecs', 'editFleet'
+    ];
+    var PERM_LABELS = {
+      editCertName: 'Edit certificate name',
+      editExpiry: 'Edit expiry date',
+      editRenewal: 'Edit renewal window',
+      uploadCert: 'Upload certificate files',
+      downloadCert: 'Download certificates',
+      deleteCert: 'Delete certificate rows',
+      addCert: 'Add certificate row',
+      editRunHrs: 'Edit running hours',
+      editBoatSpecs: 'Edit boat tech specs',
+      editFleet: 'Edit fleet availability'
+    };
+    var ACTION_LABELS = {
+      login: 'Login',
+      logout: 'Manual logout',
+      auto_logout: 'Auto logout (inactivity)',
+      download_cert: 'Cert downloaded',
+      edit_runhrs: 'Run-hrs edited',
+      edit_boatspecs: 'Boat specs edited',
+      edit_cert: 'Cert edited',
+      edit_fleet: 'Fleet edited'
+    };
+
+    function permRoleDefault(role, key) {
+      if (key === 'downloadCert') return true;
+      if (key === 'deleteCert' || key === 'editBoatSpecs' || key === 'editFleet') return role === 'admin';
+      return role === 'admin' || role === 'manager';
+    }
+    function permEffective(role, extras, key) {
+      var ex = extras || {};
+      if (ex[key] === true) return true;
+      if (ex[key] === false) return false;
+      return permRoleDefault(role, key);
+    }
+    function permOverridden(extras, key) {
+      var ex = extras || {};
+      return ex[key] === true || ex[key] === false;
+    }
+
+    var _permModalUid = null;
+
+    function openPermModal(uid) {
+      _permModalUid = uid;
+      var rec = _adminUserDocs.find(function (r) { return r.id === uid; });
+      if (!rec) return;
+      var d = rec.d;
+      var email = d.email || uid;
+      var role = d.role || 'viewer';
+      var badge = role === 'admin' ? 'admin' : role === 'manager' ? 'manager' : 'viewer';
+      document.getElementById('perm-modal-title').textContent = 'Permissions — ' + email;
+      document.getElementById('perm-modal-sub').innerHTML = 'Role: <span class="role-badge badge-' + badge + '">' + role + '</span>';
+      var ex = d.extraPermissions || {};
+      var tb = document.getElementById('perm-modal-tbody');
+      tb.innerHTML = '';
+      PERM_KEYS.forEach(function (key) {
+        var has = permEffective(role, ex, key);
+        var ov = permOverridden(ex, key);
+        var tick = has ? '<span style="color:#5BC4A8">✓</span>' : '<span style="color:#4A6A8A">✗</span>';
+        var dot = ov ? '<span class="perm-amber" title="Explicit override">●</span>' : '';
+        var val = ex[key];
+        var defCh = (val !== true && val !== false) ? ' checked' : '';
+        var grantCh = val === true ? ' checked' : '';
+        var denyCh = val === false ? ' checked' : '';
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>' + esc(PERM_LABELS[key] || key) + '</td>' +
+          '<td>' + tick + dot + '</td>' +
+          '<td style="font-size:11px;white-space:nowrap">' +
+          '<label><input type="radio" name="pm-' + esc(key) + '" value="def"' + defCh + '/> Default</label> ' +
+          '<label><input type="radio" name="pm-' + esc(key) + '" value="grant"' + grantCh + '/> Grant ✓</label> ' +
+          '<label><input type="radio" name="pm-' + esc(key) + '" value="deny"' + denyCh + '/> Deny ✗</label>' +
+          '</td>';
+        tb.appendChild(tr);
+      });
+      document.getElementById('perm-modal-saved').style.display = 'none';
+      document.getElementById('perm-modal-overlay').classList.add('open');
+    }
+    function closePermModal() {
+      document.getElementById('perm-modal-overlay').classList.remove('open');
+    }
+
+    document.getElementById('perm-modal-save').addEventListener('click', async function () {
+      if (!_permModalUid) return;
+      var rec = _adminUserDocs.find(function (r) { return r.id === _permModalUid; });
+      var merged = Object.assign({}, (rec && rec.d.extraPermissions) ? rec.d.extraPermissions : {});
+      PERM_KEYS.forEach(function (key) {
+        var r = document.querySelector('input[name="pm-' + key + '"]:checked');
+        if (!r) return;
+        if (r.value === 'def') delete merged[key];
+        else if (r.value === 'grant') merged[key] = true;
+        else merged[key] = false;
+      });
+      try {
+        await db.collection('users').doc(_permModalUid).set({ extraPermissions: merged }, { merge: true });
+        document.getElementById('perm-modal-saved').style.display = 'inline';
+        setTimeout(function () { document.getElementById('perm-modal-saved').style.display = 'none'; }, 2500);
+        await loadUsers();
+        var ps = document.getElementById('perm-user-sel');
+        if (ps) ps.value = _permModalUid;
+      } catch (e) {
+        alert('Save failed: ' + (e.message || e));
+      }
+    });
+
+    var _activityRows = [];
+
+    async function loadActivityRaw() {
+      var errEl = document.getElementById('activity-err');
+      if (errEl) errEl.textContent = '';
+      _activityRows = [];
+      try {
+        var snap = await db.collection('activity_log').orderBy('timestamp', 'desc').limit(200).get();
+        snap.forEach(function (doc) {
+          var x = doc.data();
+          x._id = doc.id;
+          _activityRows.push(x);
+        });
+      } catch (e1) {
+        try {
+          var snap2 = await db.collection('activity_log').limit(200).get();
+          snap2.forEach(function (doc) {
+            var x = doc.data();
+            x._id = doc.id;
+            _activityRows.push(x);
+          });
+          _activityRows.sort(function (a, b) {
+            var ta = a.timestamp && a.timestamp.toMillis ? a.timestamp.toMillis() : 0;
+            var tb = b.timestamp && b.timestamp.toMillis ? b.timestamp.toMillis() : 0;
+            return tb - ta;
+          });
+        } catch (e2) {
+          if (errEl) errEl.textContent = 'Could not load activity log.';
+        }
+      }
+    }
+
+    function fillActUserDropdown() {
+      var sel = document.getElementById('act-user');
+      if (!sel) return;
+      var cur = sel.value;
+      sel.innerHTML = '<option value="">All users</option>';
+      _adminUserDocs.forEach(function (rec) {
+        var em = rec.d.email || rec.id;
+        var o = document.createElement('option');
+        o.value = em;
+        o.textContent = em;
+        sel.appendChild(o);
+      });
+      if (cur) sel.value = cur;
+    }
+
+    function actRowMatchesFilters(row) {
+      var from = document.getElementById('act-from').value;
+      var to = document.getElementById('act-to').value;
+      var ufil = document.getElementById('act-user').value;
+      var typ = document.getElementById('act-type').value;
+      var ms = row.timestamp && row.timestamp.toMillis ? row.timestamp.toMillis() : 0;
+      if (from) {
+        var f = new Date(from + 'T00:00:00').getTime();
+        if (ms && ms < f) return false;
+      }
+      if (to) {
+        var t = new Date(to + 'T23:59:59').getTime();
+        if (ms && ms > t) return false;
+      }
+      if (ufil && (row.email || '') !== ufil) return false;
+      var a = row.action || '';
+      if (typ === 'login') {
+        if (['login', 'logout', 'auto_logout'].indexOf(a) < 0) return false;
+      } else if (typ === 'edits') {
+        if (['edit_runhrs', 'edit_boatspecs', 'edit_cert', 'edit_fleet'].indexOf(a) < 0) return false;
+      } else if (typ === 'downloads') {
+        if (a !== 'download_cert') return false;
+      }
+      return true;
+    }
+
+    function renderActivityFiltered() {
+      var tb = document.getElementById('activity-tbody');
+      if (!tb) return;
+      tb.innerHTML = '';
+      _activityRows.filter(actRowMatchesFilters).forEach(function (row) {
+        var tr = document.createElement('tr');
+        var dt = '—';
+        try {
+          if (row.timestamp && row.timestamp.toDate) dt = row.timestamp.toDate().toLocaleString('en-GB');
+        } catch (e) {}
+        var lbl = ACTION_LABELS[row.action] || row.action || '—';
+        tr.innerHTML =
+          '<td>' + esc(dt) + '</td>' +
+          '<td>' + esc(row.email || '') + '</td>' +
+          '<td>' + esc(row.role || '') + '</td>' +
+          '<td>' + esc(lbl) + '</td>' +
+          '<td>' + esc(row.detail || '') + '</td>';
+        tb.appendChild(tr);
+      });
+    }
+
+    async function loadSettingsFields() {
+      try {
+        var snap = await db.collection('settings').doc('session').get();
+        var v = 30;
+        if (snap.exists && snap.data().inactivityTimeoutMins != null) {
+          v = parseInt(snap.data().inactivityTimeoutMins, 10) || 30;
+        }
+        document.getElementById('set-inactivity').value = v;
+      } catch (e) {}
+    }
+
+    function showAdminPanel(tab) {
+      document.querySelectorAll('.admin-tab').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-tab') === tab);
+      });
+      ['overview', 'users', 'permissions', 'activity', 'settings'].forEach(function (id) {
+        var el = document.getElementById('panel-' + id);
+        if (el) el.style.display = id === tab ? 'block' : 'none';
+      });
+    }
+
+    document.querySelectorAll('.admin-tab').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var t = btn.getAttribute('data-tab');
+        showAdminPanel(t);
+        if (t === 'activity') {
+          loadActivityRaw().then(function () {
+            fillActUserDropdown();
+            renderActivityFiltered();
+          });
+        }
+        if (t === 'settings') loadSettingsFields();
+      });
+    });
+
+    document.getElementById('act-apply').addEventListener('click', function () {
+      renderActivityFiltered();
+    });
+
+    document.getElementById('btn-save-session').addEventListener('click', async function () {
+      var v = parseInt(document.getElementById('set-inactivity').value, 10) || 30;
+      var msg = document.getElementById('settings-msg');
+      try {
+        await db.collection('settings').doc('session').set({ inactivityTimeoutMins: v }, { merge: true });
+        msg.className = 'ok';
+        msg.textContent = 'Saved.';
+        setTimeout(function () { msg.textContent = ''; }, 2500);
+      } catch (e) {
+        msg.className = 'err';
+        msg.textContent = e.message || String(e);
+      }
+    });
+
+    document.getElementById('perm-user-sel').addEventListener('change', function () {
+      if (this.value) openPermModal(this.value);
+    });
+
     document.getElementById('btn-signout').addEventListener('click', function () {
       firebase.auth().signOut().then(function () {
         window.location.href = 'index.html';
@@ -518,6 +917,7 @@
       try {
         firebase.initializeApp(FIREBASE_CONFIG);
         db = firebase.firestore();
+        _fbDb = db;
       } catch (e) {
         console.error(e);
         document.getElementById('gate').textContent = 'Firebase failed to initialise.';
@@ -537,7 +937,7 @@
             window.location.replace('index.html');
             return;
           }
-          initPermissions(d.role, d.extraPermissions);
+          initPermissions(d.role, d.extraPermissions, user.email, user.uid);
           document.getElementById('gate').style.display = 'none';
           document.getElementById('app-root').style.display = 'block';
           await loadUsers();

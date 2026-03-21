@@ -63,6 +63,10 @@ button { font-family: inherit; cursor: pointer; }
 .cert-ei-win { color:#7A9AB8;font-size:10px;font-style:italic;width:130px;flex-shrink:0; }
 .cert-ei-win[type="date"] { color:#FFFFFF;font-size:11px;font-style:normal; }
 .cert-ei-win[type="date"]::-webkit-calendar-picker-indicator { filter:invert(0.5);cursor:pointer; }
+.rh-cell-wrap { position:relative; display:inline-flex; align-items:center; justify-content:center; min-width:56px; }
+.rh-star { position:absolute; top:1px; right:2px; font-size:9px; color:#E0A050; cursor:pointer; z-index:2; line-height:1; }
+.rh-pencil { font-size:10px; color:#5AB8E8; cursor:pointer; margin-left:4px; opacity:0; transition:opacity 0.15s; flex-shrink:0; }
+.rh-cell-wrap:hover .rh-pencil { opacity:1; }
 .cert-del-btn { font-size:14px;cursor:pointer;opacity:0.35;transition:opacity 0.15s;flex-shrink:0;padding:2px 4px;border-radius:4px; }
 .cert-del-btn:hover { opacity:1;background:rgba(200,40,40,0.15); }
 .cert-add-btn { display:flex;align-items:center;gap:7px;margin-top:10px;padding:9px 16px;background:transparent;border:1px dashed #2A5A7A;border-radius:8px;color:#5AB8E8;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:0.06em;transition:all 0.15s;width:fit-content; }
@@ -282,8 +286,15 @@ select option { background:#0D1F3C;color:#FFFFFF; }
           errEl.textContent = 'Your account has been suspended. Contact your administrator.';
           return;
         }
-        initPermissions(data.role, data.extraPermissions);
+        const exNorm = Object.assign({}, data.extraPermissions || {});
+        if (exNorm.upload === true && exNorm.uploadCert == null) exNorm.uploadCert = true;
+        if (exNorm.upload === false && exNorm.uploadCert == null) exNorm.uploadCert = false;
+        initPermissions(data.role, exNorm,
+          cred.user.email, cred.user.uid);
         applyRoleGating();
+        await loadSessionSettings();
+        await logActivity('login', 'Dashboard login');
+        startInactivityTimer();
         showDashboard();
       } catch (err) {
         if (err.code === 'auth/user-disabled') {
@@ -299,8 +310,10 @@ select option { background:#0D1F3C;color:#FFFFFF; }
       if (el) el.textContent = msg;
     }
 
-    function handleSignOut() {
-      if (_fbAuth) _fbAuth.signOut();
+    async function handleSignOut() {
+      try { await logActivity('logout', 'Manual sign out'); } catch (e) {}
+      stopInactivityTimer();
+      if (_fbAuth) await _fbAuth.signOut();
       if (refreshTimer) clearInterval(refreshTimer);
       refreshTimer = null;
       showLogin();
@@ -310,6 +323,7 @@ select option { background:#0D1F3C;color:#FFFFFF; }
       // Reset gated controls so re-apply after dynamic cert re-renders is correct
       document.querySelectorAll('.cert-del-btn').forEach(el => { el.style.display = ''; });
       document.querySelectorAll('.cert-upload-btn').forEach(el => { el.style.display = ''; });
+      document.querySelectorAll('.cert-view-btn').forEach(el => { el.style.display = ''; });
       document.querySelectorAll('.cert-add-btn').forEach(el => { el.style.display = ''; });
       document.querySelectorAll('.cert-ei').forEach(el => {
         el.readOnly = false;
@@ -365,8 +379,67 @@ select option { background:#0D1F3C;color:#FFFFFF; }
           nirixLogo.onclick = null;
         }
       }
+      const fleetEditWrap = document.getElementById('fleet-edit-btn-wrap');
+      if (fleetEditWrap) {
+        fleetEditWrap.style.display = can.editFleet() ? '' : 'none';
+      }
+      if (!can.downloadCert()) {
+        document.querySelectorAll('.cert-view-btn').forEach(el => { el.style.display = 'none'; });
+      } else {
+        document.querySelectorAll('.cert-view-btn').forEach(el => { el.style.display = ''; });
+      }
+      const certDl = document.getElementById('certDocDlBtn');
+      if (certDl) {
+        certDl.style.display = can.downloadCert() ? '' : 'none';
+      }
     }
     // ── END FIREBASE AUTH ──────────────────────────────────────────
+
+    let _inactivityTimer  = null;
+    let _inactivityMins   = 30;
+
+    async function loadSessionSettings() {
+      try {
+        const snap = await _fbDb.collection('settings').doc('session').get();
+        if (snap.exists && snap.data().inactivityTimeoutMins) {
+          _inactivityMins = parseInt(snap.data().inactivityTimeoutMins, 10) || 30;
+        }
+      } catch (e) { /* use default */ }
+    }
+
+    function resetInactivityTimer() {
+      if (!_inactivityTimer) return;
+      clearTimeout(_inactivityTimer);
+      _inactivityTimer = setTimeout(autoLogout, _inactivityMins * 60 * 1000);
+    }
+
+    function startInactivityTimer() {
+      clearTimeout(_inactivityTimer);
+      _inactivityTimer = setTimeout(autoLogout, _inactivityMins * 60 * 1000);
+      ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(ev =>
+        document.addEventListener(ev, resetInactivityTimer, { passive: true })
+      );
+    }
+
+    function stopInactivityTimer() {
+      clearTimeout(_inactivityTimer);
+      _inactivityTimer = null;
+      ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(ev =>
+        document.removeEventListener(ev, resetInactivityTimer)
+      );
+    }
+
+    async function autoLogout() {
+      await logActivity('auto_logout', 'Inactivity timeout — ' + _inactivityMins + ' mins');
+      if (_fbAuth) await _fbAuth.signOut();
+      stopInactivityTimer();
+      showLogin();
+      const errEl = document.getElementById('login-error');
+      if (errEl) {
+        errEl.textContent =
+          'You were signed out due to ' + _inactivityMins + ' minutes of inactivity.';
+      }
+    }
 
     function todaySGT(){return new Date(Date.now()+8*3600000).toISOString().slice(0,10);}
     function toSGTDate(iso){if(!iso)return '';return new Date(new Date(iso).getTime()+8*3600000).toISOString().slice(0,10);}
@@ -482,6 +555,181 @@ select option { background:#0D1F3C;color:#FFFFFF; }
       return result;
     }
 
+    let _runhrsEditsLatest = {};
+
+    function rhEditKey(boat, sidePortStbd, month, year) {
+      const s = sidePortStbd === 'Port' ? 'port' : 'stbd';
+      return boat + '|' + s + '|' + month + '|' + year;
+    }
+
+    async function refreshRunhrsEditsCache(monthTuples) {
+      if (!_fbDb || !getCurrentUser().uid) return;
+      const uniq = {};
+      (monthTuples || []).forEach(function (mo) {
+        uniq[mo.year + '-' + mo.month] = { month: mo.month, year: mo.year };
+      });
+      try {
+        const pairs = Object.values(uniq);
+        for (let i = 0; i < pairs.length; i++) {
+          const month = pairs[i].month;
+          const year = pairs[i].year;
+          const snap = await _fbDb.collection('runhrs_edits').where('month', '==', month).where('year', '==', year).get();
+          snap.forEach(function (doc) {
+            const d = doc.data();
+            const side = (d.engineSide || 'port').toLowerCase();
+            const k = d.boatName + '|' + side + '|' + d.month + '|' + d.year;
+            const t = d.editedAt && d.editedAt.toMillis ? d.editedAt.toMillis() : 0;
+            const cur = _runhrsEditsLatest[k];
+            if (!cur || t > cur._t) {
+              _runhrsEditsLatest[k] = {
+                editedValue: d.editedValue,
+                originalValue: d.originalValue,
+                editedBy: d.editedBy || '',
+                editedAt: d.editedAt,
+                _t: t
+              };
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('runhrs_edits fetch failed', e);
+      }
+    }
+
+    function runHrsDisplayForMonth(boat, side, month, year) {
+      const k = rhEditKey(boat, side, month, year);
+      const ed = _runhrsEditsLatest[k];
+      if (ed != null && typeof ed.editedValue === 'number' && !isNaN(ed.editedValue)) return ed.editedValue;
+      return runHrsForMonth(boat, side, month, year);
+    }
+
+    function rhEscAttr(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    }
+
+    function rhFleetCellTd(boat, side, month, year, v, isLatest, rowBg, padding) {
+      const display = v !== null ? Math.round(v).toLocaleString('en-SG') : '—';
+      const bg = isLatest ? '#0D2234' : rowBg;
+      const color = v !== null ? (side === 'Port' ? '#FFFFFF' : '#7ACFAA') : '#3A4A60';
+      const fs = side === 'Port' ? '13px' : '12px';
+      const fw = side === 'Port' ? '600' : '500';
+      const baseStyle = 'text-align:center;padding:' + padding + ';border-left:1px solid #1A2F4A;border-top:none;border-bottom:none;background:' + bg + ';font-size:' + fs + ';font-weight:' + fw + ';color:' + color + ';white-space:nowrap';
+      const k = rhEditKey(boat, side, month, year);
+      const meta = _runhrsEditsLatest[k];
+      const u = getCurrentUser();
+      const showStar = (u.role === 'admin' || u.role === 'manager') && meta;
+      const escBoat = rhEscAttr(boat);
+      const sideLower = side === 'Port' ? 'port' : 'stbd';
+      const starHtml = showStar
+        ? '<span class="rh-star" data-boat="' + escBoat + '" data-side="' + sideLower + '" data-month="' + month + '" data-year="' + year + '" onclick="rhStarClick(event,this)" title="Audit trail">★</span>'
+        : '';
+      const canE = typeof can !== 'undefined' && can.editRunHrs && can.editRunHrs();
+      const pencilHtml = canE ? '<span class="rh-pencil" onclick="rhPencilClick(event,this)">✎</span>' : '';
+      const cellInner = '<span class="rh-cell" data-boat="' + escBoat + '" data-side="' + sideLower + '" data-month="' + month + '" data-year="' + year + '">' + display + '</span>';
+      return '<td style="' + baseStyle + '"><div class="rh-cell-wrap">' + starHtml + cellInner + pencilHtml + '</div></td>';
+    }
+
+    window.rhStarClick = function (ev, el) {
+      ev.stopPropagation();
+      const boat = el.getAttribute('data-boat');
+      const side = el.getAttribute('data-side');
+      const month = parseInt(el.getAttribute('data-month'), 10);
+      const year = parseInt(el.getAttribute('data-year'), 10);
+      const k = boat + '|' + side + '|' + month + '|' + year;
+      const m = _runhrsEditsLatest[k];
+      if (!m) return;
+      let dt = '—';
+      try {
+        if (m.editedAt && m.editedAt.toDate) dt = m.editedAt.toDate().toLocaleString('en-GB');
+      } catch (e2) {}
+      const msg = 'Edited by: ' + (m.editedBy || '—') + '\nDate: ' + dt +
+        '\nOriginal value: ' + m.originalValue + ' hrs\nNew value: ' + m.editedValue + ' hrs';
+      alert(msg);
+    };
+
+    window.rhPencilClick = function (ev, pencilEl) {
+      ev.stopPropagation();
+      const wrap = pencilEl.closest('.rh-cell-wrap');
+      if (!wrap) return;
+      const cell = wrap.querySelector('.rh-cell');
+      if (!cell) return;
+      const boat = cell.getAttribute('data-boat');
+      const side = cell.getAttribute('data-side');
+      const month = parseInt(cell.getAttribute('data-month'), 10);
+      const year = parseInt(cell.getAttribute('data-year'), 10);
+      const curText = (cell.textContent || '').replace(/,/g, '').trim();
+      const curVal = curText === '—' ? '' : curText;
+      wrap.innerHTML = '<input type="number" class="rh-inline-inp" step="0.1" style="width:72px;padding:4px 6px;background:#0D1F3C;border:1px solid #1E3A5F;border-radius:4px;color:#FFF;font-size:12px" value="' + rhEscAttr(curVal) + '"/>' +
+        ' <span onclick="rhConfirmEdit(this)" style="cursor:pointer;color:#5BC4A8;font-weight:700">✓</span>' +
+        ' <span onclick="rhCancelEdit(this)" style="cursor:pointer;color:#E05A5A;margin-left:4px">×</span>' +
+        '<input type="hidden" class="rh-h-boat" value="' + rhEscAttr(boat) + '"/><input type="hidden" class="rh-h-side" value="' + side + '"/><input type="hidden" class="rh-h-month" value="' + month + '"/><input type="hidden" class="rh-h-year" value="' + year + '"/>';
+      const inp = wrap.querySelector('.rh-inline-inp');
+      if (inp) inp.focus();
+    };
+
+    window.rhCancelEdit = function () {
+      renderFleet().catch(function (e) { console.error(e); });
+    };
+
+    window.rhConfirmEdit = async function (checkEl) {
+      const wrap = checkEl.closest('.rh-cell-wrap');
+      if (!wrap) return;
+      const inp = wrap.querySelector('.rh-inline-inp');
+      const boat = wrap.querySelector('.rh-h-boat').value;
+      const side = wrap.querySelector('.rh-h-side').value;
+      const month = parseInt(wrap.querySelector('.rh-h-month').value, 10);
+      const year = parseInt(wrap.querySelector('.rh-h-year').value, 10);
+      const newVal = parseFloat(inp.value);
+      if (isNaN(newVal)) { alert('Enter a valid number'); return; }
+      const sideLabel = side === 'port' ? 'Port' : 'Stbd';
+      const orig = runHrsForMonth(boat, sideLabel, month, year);
+      try {
+        await _fbDb.collection('runhrs_edits').add({
+          boatName: boat,
+          engineSide: side,
+          month: month,
+          year: year,
+          editedValue: newVal,
+          originalValue: orig != null && !isNaN(orig) ? orig : newVal,
+          editedBy: getCurrentUser().email || '',
+          editedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          sessionId: typeof getNrixSessionId === 'function' ? getNrixSessionId() : ''
+        });
+        await logActivity('edit_runhrs', boat + ' ' + side + ' ' + (month + 1) + '/' + year + ' → ' + newVal + ' hrs');
+        const totalCols = fleetOlderShown ? 12 : 6;
+        await refreshRunhrsEditsCache(monthSequence(totalCols));
+        renderFleet().catch(function (e2) { console.error(e2); });
+      } catch (e) {
+        console.error(e);
+        alert('Could not save: ' + (e.message || e));
+      }
+    };
+
+    let _boatspecsOverrides = {};
+
+    async function fetchBoatspecsOverrides() {
+      _boatspecsOverrides = {};
+      if (!_fbDb || !getCurrentUser().uid) return;
+      try {
+        const snap = await _fbDb.collection('boatspecs_overrides').get();
+        snap.forEach(function (d) {
+          _boatspecsOverrides[d.id] = d.data() || {};
+        });
+      } catch (e) {
+        console.warn('boatspecs_overrides', e);
+      }
+    }
+
+    function bsMerged(boat) {
+      const base = BOAT_SPECS[boat] || {};
+      const ov = _boatspecsOverrides[boat] || {};
+      const o = Object.assign({}, base);
+      Object.keys(ov).forEach(function (k) {
+        if (ov[k] != null && ov[k] !== '') o[k] = ov[k];
+      });
+      return o;
+    }
+
     async function loadData(){
       try{
         const [r1,r2]=await Promise.all([fetch(SHEET_URL),fetch(SPECS_URL)]);
@@ -494,7 +742,11 @@ select option { background:#0D1F3C;color:#FFFFFF; }
 
     function renderAll(){
       if(activeModule==='daily'){if(activeView==='daily')renderDaily();else renderMonthly();}
-      else if(activeModule==='runhrs'){if(activeRunhrs==='fleet')renderFleet();else if(activeRunhrs==='runhrs')renderRunhrs();else renderSpecs();}
+      else if(activeModule==='runhrs'){
+        if(activeRunhrs==='fleet')renderFleet().catch(function(e){console.error(e);});
+        else if(activeRunhrs==='runhrs')renderRunhrs();
+        else renderSpecs();
+      }
       else if(activeModule==='boatspecs')renderBoatSpecs();
     }
 
@@ -822,11 +1074,12 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     let bsOpenSG = true, bsOpenSC = true;
 
     // ── FLEET MONTHLY OVERVIEW ──
-    function renderFleet(){
+    async function renderFleet(){
       const container=document.getElementById('v-fleet');
       const boats=fleetCompany==='Sea Cabbie'?SEA_CABBIE:SG_SHIPPING;
       const totalCols=fleetOlderShown?12:6;
       const months=monthSequence(totalCols);
+      await refreshRunhrsEditsCache(months);
 
       // Company tab bar
       let html=`<div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #1E3A5F">
@@ -859,8 +1112,8 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         const isLatestMo = true;
         const rowBg = bi%2===0 ? '#0A1628' : '#0B1A2E';
 
-        const portVals = months.map(mo=>runHrsForMonth(boat,'Port',mo.month,mo.year));
-        const stbdVals = months.map(mo=>runHrsForMonth(boat,'Stbd',mo.month,mo.year));
+        const portVals = months.map(mo=>runHrsDisplayForMonth(boat,'Port',mo.month,mo.year));
+        const stbdVals = months.map(mo=>runHrsDisplayForMonth(boat,'Stbd',mo.month,mo.year));
 
         // ── Row 1: Boat name ──
         html+=`<tr>`;
@@ -886,7 +1139,8 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         </td>`;
         portVals.forEach((v,i)=>{
           const isLatest=i===0;
-          html+=`<td style="text-align:center;padding:5px 12px 4px 12px;border-left:1px solid #1A2F4A;border-top:none;border-bottom:none;background:${isLatest?'#0D2234':rowBg};font-size:13px;font-weight:600;color:${v!==null?'#FFFFFF':'#3A4A60'};white-space:nowrap">${v!==null?Math.round(v).toLocaleString('en-SG'):'—'}</td>`;
+          const mo=months[i];
+          html+=rhFleetCellTd(boat,'Port',mo.month,mo.year,v,isLatest,rowBg,'5px 12px 4px 12px');
         });
         html+=`<td style="background:#071828;border-left:1px solid #1A2F4A;border-top:none;border-bottom:none"></td>`;
         html+=`</tr>`;
@@ -901,7 +1155,24 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         </td>`;
         stbdVals.forEach((v,i)=>{
           const isLatest=i===0;
-          html+=`<td style="text-align:center;padding:4px 12px 8px 12px;border-left:1px solid #1A2F4A;border-top:none;border-bottom:${isLast?'none':'1px solid #1A2F4A'};background:${isLatest?'#0D2234':rowBg};font-size:12px;font-weight:500;color:${v!==null?'#7ACFAA':'#3A4A60'};white-space:nowrap">${v!==null?Math.round(v).toLocaleString('en-SG'):'—'}</td>`;
+          const mo=months[i];
+          const pad='4px 12px 8px 12px';
+          const bot=isLast?'none':'1px solid #1A2F4A';
+          const v2=v;
+          const disp=v2!==null?Math.round(v2).toLocaleString('en-SG'):'—';
+          const bg=isLatest?'#0D2234':rowBg;
+          const color=v2!==null?'#7ACFAA':'#3A4A60';
+          const k=rhEditKey(boat,'Stbd',mo.month,mo.year);
+          const meta=_runhrsEditsLatest[k];
+          const u=getCurrentUser();
+          const showStar=(u.role==='admin'||u.role==='manager')&&meta;
+          const escBoat=rhEscAttr(boat);
+          const starHtml=showStar?'<span class="rh-star" data-boat="'+escBoat+'" data-side="stbd" data-month="'+mo.month+'" data-year="'+mo.year+'" onclick="rhStarClick(event,this)" title="Audit trail">★</span>':'';
+          const canE=typeof can!=='undefined'&&can.editRunHrs&&can.editRunHrs();
+          const pencilHtml=canE?'<span class="rh-pencil" onclick="rhPencilClick(event,this)">✎</span>':'';
+          const cellInner='<span class="rh-cell" data-boat="'+escBoat+'" data-side="stbd" data-month="'+mo.month+'" data-year="'+mo.year+'">'+disp+'</span>';
+          const baseStyle='text-align:center;padding:'+pad+';border-left:1px solid #1A2F4A;border-top:none;border-bottom:'+bot+';background:'+bg+';font-size:12px;font-weight:500;color:'+color+';white-space:nowrap';
+          html+='<td style="'+baseStyle+'"><div class="rh-cell-wrap">'+starHtml+cellInner+pencilHtml+'</div></td>';
         });
         html+=`<td style="background:#071828;border-left:1px solid #1A2F4A;border-top:none;border-bottom:${isLast?'none':'1px solid #1A2F4A'}"></td>`;
         html+=`</tr>`;
@@ -929,8 +1200,8 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
                background:${active?'#071828':'transparent'};
                border-radius:4px 4px 0 0;letter-spacing:0.03em">${name}</div>`;
     }
-    function switchFleetCompany(name){fleetCompany=name;fleetOlderShown=false;renderFleet();}
-    function toggleFleetOlder(){fleetOlderShown=!fleetOlderShown;renderFleet();}
+    function switchFleetCompany(name){fleetCompany=name;fleetOlderShown=false;renderFleet().catch(function(e){console.error(e);});}
+    function toggleFleetOlder(){fleetOlderShown=!fleetOlderShown;renderFleet().catch(function(e){console.error(e);});}
 
     // ── MONTHLY RUNNING HOURS ──
     function renderRunhrs(){
@@ -1101,6 +1372,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       // Show loading state
       wrap.innerHTML='<div style="padding:20px;color:#8AA8C0;font-size:12px">Loading specs...</div>';
       await loadBoatSpecs();
+      await fetchBoatspecsOverrides();
       let sb=`<div style="width:185px;min-width:185px;border-right:1px solid #1E3A5F;background:#0D1F3C;overflow-y:auto;display:flex;flex-direction:column">`;
       sb+=bsSidebarGroup('SG Shipping',BS_SG,'sg');
       sb+=bsSidebarGroup('Sea Cabbie',BS_SC,'sc');
@@ -1115,25 +1387,57 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     }
     function bsToggle(key){if(key==='sg')bsOpenSG=!bsOpenSG;else bsOpenSC=!bsOpenSC;renderBoatSpecs();}
     function bsSelect(b){bsSelected=b;renderBoatSpecs();}
-    function bsR(label,val){const e=!val||val===''||val.toLowerCase()==='na';if(e)return '';return `<div style="display:flex;align-items:baseline;padding:5px 0;border-bottom:0.5px solid #1A2F4A"><span style="font-size:11px;color:#8AA8C0;white-space:nowrap;width:190px;flex-shrink:0">${label}</span><span style="font-size:11px;font-weight:500;color:#FFFFFF">${val}</span></div>`;}
+    function bsR(label,val){const e=!val||val===''||String(val).toLowerCase()==='na';if(e)return '';return `<div style="display:flex;align-items:baseline;padding:5px 0;border-bottom:0.5px solid #1A2F4A"><span style="font-size:11px;color:#8AA8C0;white-space:nowrap;width:190px;flex-shrink:0">${label}</span><span style="font-size:11px;font-weight:500;color:#FFFFFF">${val}</span></div>`;}
+    function bsInp(label,key,val){
+      const k=(key||'').replace(/"/g,'&quot;');
+      return `<div style="display:flex;align-items:baseline;padding:5px 0;border-bottom:0.5px solid #1A2F4A;gap:8px"><span style="font-size:11px;color:#8AA8C0;white-space:nowrap;width:190px;flex-shrink:0">${label}</span><input class="cert-ei bs-spec-field" data-bs-key="${k}" value="${rhEscAttr(String(val==null?'':val))}" style="flex:1;min-width:0;font-size:11px"/></div>`;
+    }
     function bsSec(t){return `<div style="font-size:9px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:#5A7A8A;padding-bottom:6px;border-bottom:0.5px solid #1A2F4A;margin-bottom:8px;margin-top:18px">${t}</div>`;}
     function bsHull(h){if(!h)return '';const bg=h==='Aluminium'?'#0D2A10':h==='Wood'?'#2A1A05':'#071828';const bc=h==='Aluminium'?'#1A6A2A':h==='Wood'?'#6A4A0A':'#1A4A6A';return `<span style="display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:500;background:${bg};border:0.5px solid ${bc};color:#FFFFFF;margin-left:8px">${h}</span>`;}
     function bsDetailHTML(name){
-      const b=BOAT_SPECS[name];if(!b)return '<div style="color:#3A4A60;padding:20px">Select a vessel</div>';
+      const b=bsMerged(name);if(!b||!Object.keys(b).length)return '<div style="color:#3A4A60;padding:20px">Select a vessel</div>';
+      const ed=typeof can!=='undefined'&&can.editBoatSpecs&&can.editBoatSpecs();
+      function row(label,key,fmt){
+        const raw=b[key]||'';
+        if(ed)return bsInp(label,key,raw);
+        const disp=fmt?fmt(raw):raw;
+        return bsR(label,disp);
+      }
       let h=`<div style="font-size:17px;font-weight:500;color:#FFFFFF;margin-bottom:3px">${name}</div>`;
       h+=`<div style="font-size:11px;color:#8AA8C0;margin-bottom:20px">${b['company']} &nbsp;&middot;&nbsp; ${b['SC Number']} &nbsp;&middot;&nbsp; MMSI ${b['MMSI Number']}${b['Year Built']?' &nbsp;&middot;&nbsp; Built '+b['Year Built']:''}</div>`;
       h+=bsSec('Dimensions &amp; registration');
-      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${bsR('LOA',b['LOA']?b['LOA']+' m':'')}${bsR('Breadth',b['Breadth']?b['Breadth']+' m':'')}${bsR('Depth',b['Depth']?b['Depth']+' m':'')}${bsR('Hull material',b['Hull'])}${bsR('Class',b['Class'])}${bsR('Flag',b['Flag'])}</div><div>${bsR('Pax capacity',b['Passenger Capacity'])}${bsR('Crew',b['Crew Capacity'])}${bsR('Mooring buoy',b['Mooring Buoy'])}</div></div>`;
+      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('LOA','LOA',function(v){return v?v+' m':'';})}${row('Breadth','Breadth',function(v){return v?v+' m':'';})}${row('Depth','Depth',function(v){return v?v+' m':'';})}${row('Hull material','Hull')}${row('Class','Class')}${row('Flag','Flag')}</div><div>${row('Pax capacity','Passenger Capacity')}${row('Crew','Crew Capacity')}${row('Mooring buoy','Mooring Buoy')}</div></div>`;
       h+=bsSec('Navigation equipment');
-      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${bsR('AIS',b['AIS'])}</div><div>${bsR('GPS',b['GPS'])}</div></div>`;
+      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('AIS','AIS')}</div><div>${row('GPS','GPS')}</div></div>`;
       h+=bsSec('Main engine');
-      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${bsR('Model',b['Engine Model'])}${bsR('Serial no.',b['Engine Serial Number'])}</div><div>${bsR('Gearbox',b['Gearbox Model'])}${bsR('Gear ratio',b['Gearbox Ratio'])}${bsR('Gearbox serial',b['Gearbox Serial Number'])}</div></div>`;
+      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('Model','Engine Model')}${row('Serial no.','Engine Serial Number')}</div><div>${row('Gearbox','Gearbox Model')}${row('Gear ratio','Gearbox Ratio')}${row('Gearbox serial','Gearbox Serial Number')}</div></div>`;
       h+=bsSec('Generator');
-      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${bsR('Model',b['Generator Model'])}${bsR('Engine',b['Generator Engine'])}</div><div>${bsR('Serial no.',b['Generator Serial Number'])}</div></div>`;
+      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('Model','Generator Model')}${row('Engine','Generator Engine')}</div><div>${row('Serial no.','Generator Serial Number')}</div></div>`;
       h+=bsSec('Propulsion &amp; fittings');
-      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${bsR('Propeller',b['Propeller Size'])}${bsR('Shaft size',b['Shaft Size'])}</div><div>${bsR('Rudder',b['Rudder Size'])}${bsR('Steering type',b['Steering Type'])}</div></div>`;
+      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('Propeller','Propeller Size')}${row('Shaft size','Shaft Size')}</div><div>${row('Rudder','Rudder Size')}${row('Steering type','Steering Type')}</div></div>`;
+      if(ed)h+=`<div style="margin-top:20px"><button type="button" onclick="bsSaveSpecs()" style="padding:10px 20px;background:#0D6A7A;border:none;border-radius:8px;color:#FFFFFF;font-weight:600;cursor:pointer;font-size:12px;font-family:inherit">Save specs</button></div>`;
       return h;
     }
+
+    window.bsSaveSpecs = async function () {
+      const boat = bsSelected;
+      const wrap = document.getElementById('bs-detail');
+      if (!wrap || !_fbDb || !boat) return;
+      const payload = {};
+      wrap.querySelectorAll('.bs-spec-field').forEach(function (inp) {
+        const k = inp.getAttribute('data-bs-key');
+        if (k) payload[k] = inp.value;
+      });
+      try {
+        await _fbDb.collection('boatspecs_overrides').doc(boat).set(payload, { merge: true });
+        _boatspecsOverrides[boat] = Object.assign({}, _boatspecsOverrides[boat] || {}, payload);
+        await logActivity('edit_boatspecs', boat + ' — specs updated');
+        renderBoatSpecs();
+      } catch (e) {
+        console.error(e);
+        alert('Save failed: ' + (e.message || e));
+      }
+    };
 
     window.addEventListener('DOMContentLoaded',()=>{
       initFirebase();
@@ -1170,7 +1474,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         ?(document.getElementById('login-pass').value||'')
         :((document.getElementById('login-input')||{}).value||'');
       if(pass===DASHBOARD_PASS){
-        initPermissions('admin',{});
+        initPermissions('admin',{}, '', '');
         applyRoleGating();
         showDashboard();
       }else{
@@ -1586,6 +1890,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       certDocRefreshPreview();
       document.getElementById('certDocOverlay').style.display='flex';
       applyRoleGating();
+      logActivity('download_cert', name + ' — ' + boat);
     }
     function closeCertDoc(){
       document.getElementById('certDocOverlay').style.display='none';
@@ -1636,6 +1941,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       const ext=data.startsWith('data:image/png')?'.png':data.startsWith('data:image/jpeg')?'.jpg':'.pdf';
       a.href=data; a.download=(_certDocName+ext).replace(/[^a-z0-9._-]/gi,'_');
       a.click();
+      logActivity('download_cert', _certDocName + ' — ' + _certDocBoat);
     }
 
   
@@ -2603,6 +2909,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="permissions.js"></script>
+<script src="activity-log.js"></script>
 </head>
 <body>
 
@@ -2888,7 +3195,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       </div>
     </div>
     <div style="padding:11px 18px;border-top:1px solid #1E3A5F;flex-shrink:0;display:flex;gap:8px">
-      <div id="certDocDlBtn" onclick="certDownloadFile()"
+      <div id="certDocDlBtn" class="cert-dl-btn" onclick="certDownloadFile()"
         style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 0;border-radius:6px;background:#0D2A3A;border:1px solid #2A6A9A;color:#5AB8E8;font-size:11px;font-weight:600;cursor:pointer;opacity:0.4;pointer-events:none;transition:background 0.15s"
         onmouseover="this.style.background='#102E42'" onmouseout="this.style.background='#0D2A3A'">
         &#8659;&nbsp;Download Certificate
