@@ -1766,6 +1766,142 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
           const s=document.createElement('style');
           s.id='cyber-style';
           s.textContent=`
+            /* ── FUTURISTIC SHAPE SYSTEM ── */
+
+            /* Surface cards: 16px radius, glass highlight top edge, blur backdrop */
+            body.theme-cyber #module-daily,
+            body.theme-cyber #module-runhrs,
+            body.theme-cyber #module-boatspecs,
+            body.theme-cyber #module-certs,
+            body.theme-cyber #module-fleet,
+            body.theme-cyber #v-daily,
+            body.theme-cyber #v-fleet,
+            body.theme-cyber #v-runhrs,
+            body.theme-cyber #v-specs,
+            body.theme-cyber #v-boatspecs {
+              background: rgba(14,18,56,0.4) !important;
+              backdrop-filter: blur(12px);
+              -webkit-backdrop-filter: blur(12px);
+            }
+
+            /* Boat cards — surface shape */
+            body.theme-cyber #v-daily > div > div > div[style*="background:#0D1F3C"],
+            body.theme-cyber #v-daily > div > div > div[style*="background:#0D1628"] {
+              border-radius: 14px !important;
+              border-top: 1px solid rgba(255,255,255,0.08) !important;
+              backdrop-filter: blur(8px);
+            }
+
+            /* Module nav tabs: pill-style active indicator, glass surface */
+            body.theme-cyber #module-nav > div {
+              border-radius: 10px 10px 0 0 !important;
+              background: rgba(14,18,56,0.5) !important;
+              backdrop-filter: blur(8px);
+              border-color: rgba(139,146,214,0.18) !important;
+              border-bottom: none !important;
+            }
+            body.theme-cyber #module-nav > div > div:first-child {
+              border-radius: 6px 6px 0 0;
+            }
+
+            /* Settings popup: glass surface with 16px radius */
+            body.theme-cyber #settings-popup {
+              border-radius: 16px !important;
+              background: rgba(14,18,56,0.85) !important;
+              backdrop-filter: blur(16px) !important;
+              -webkit-backdrop-filter: blur(16px) !important;
+              border: 1px solid rgba(139,146,214,0.18) !important;
+              border-top: 1px solid rgba(255,255,255,0.10) !important;
+            }
+
+            /* Settings gear button: pill shape */
+            body.theme-cyber #settings-btn {
+              border-radius: 50% !important;
+              width: 30px !important;
+              height: 30px !important;
+            }
+
+            /* Buttons: pill shape (radius-pill = 999px) */
+            body.theme-cyber button.ln-btn,
+            body.theme-cyber .sp-popup-close,
+            body.theme-cyber .cert-add-btn,
+            body.theme-cyber .cert-view-btn span {
+              border-radius: 999px !important;
+            }
+
+            /* Left rail / nav panels: glass surface */
+            body.theme-cyber #left-rail,
+            body.theme-cyber #left-nav,
+            body.theme-cyber .sp-tab-bar {
+              background: rgba(10,14,40,0.6) !important;
+              backdrop-filter: blur(10px);
+            }
+
+            /* Modal: 20px radius surface card */
+            body.theme-cyber #modalOverlay > div,
+            body.theme-cyber #certDocOverlay > div {
+              border-radius: 20px !important;
+              background: rgba(14,18,56,0.92) !important;
+              backdrop-filter: blur(20px) !important;
+              border: 1px solid rgba(139,146,214,0.18) !important;
+              border-top: 1px solid rgba(255,255,255,0.10) !important;
+            }
+
+            /* Progress bars: pill track */
+            body.theme-cyber .cert-view-btn span {
+              background: rgba(43,51,198,0.25) !important;
+              border-color: rgba(0,229,255,0.3) !important;
+            }
+
+            /* Corner-cross markers on header logo boxes */
+            body.theme-cyber #header > div {
+              border-radius: 12px !important;
+              backdrop-filter: blur(10px);
+              background: rgba(14,18,56,0.5) !important;
+              position: relative;
+            }
+            body.theme-cyber #header > div::before {
+              content:'';
+              position:absolute;top:6px;left:6px;
+              width:6px;height:6px;
+              border-top:1.5px solid rgba(0,229,255,0.6);
+              border-left:1.5px solid rgba(0,229,255,0.6);
+              pointer-events:none;
+            }
+            body.theme-cyber #header > div::after {
+              content:'';
+              position:absolute;bottom:6px;right:6px;
+              width:6px;height:6px;
+              border-bottom:1.5px solid rgba(0,229,255,0.6);
+              border-right:1.5px solid rgba(0,229,255,0.6);
+              pointer-events:none;
+            }
+
+            /* Fleet board side-panel: glass card */
+            body.theme-cyber #side-panel {
+              border-radius: 16px !important;
+              background: rgba(14,18,56,0.85) !important;
+              backdrop-filter: blur(14px) !important;
+              border: 1px solid rgba(139,146,214,0.18) !important;
+              border-top: 1px solid rgba(255,255,255,0.10) !important;
+            }
+
+            /* Analytics overlay: glass surface */
+            body.theme-cyber #analytics-overlay {
+              background: rgba(8,11,40,0.95) !important;
+              backdrop-filter: blur(18px) !important;
+              border-left: 1px solid rgba(139,146,214,0.15) !important;
+            }
+
+            /* Row hover indent like .data-item */
+            body.theme-cyber .cert-grid-row:hover,
+            body.theme-cyber .cert-edit-row:hover {
+              border-radius: 6px !important;
+              background: rgba(43,51,198,0.06) !important;
+            }
+
+            /* ── END SHAPE SYSTEM ── */
+
             body.theme-cyber, body.theme-cyber button, body.theme-cyber select, body.theme-cyber input {
               font-family: 'Rajdhani', 'Segoe UI', sans-serif !important;
               letter-spacing: 0.03em;
