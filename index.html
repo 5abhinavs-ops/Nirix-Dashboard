@@ -2067,6 +2067,9 @@ function endDrag(){
     document.title='* Fleet Availability Board';
     document.getElementById('pb-count').textContent='\u2713 '+n+' cells painted';
     setTimeout(()=>{ if(!activePaintStatus) document.getElementById('pb-count').textContent=''; },2500);
+    // Live refresh analytics if overlay is open
+    const ov=document.getElementById('analytics-overlay');
+    if(ov&&ov.classList.contains('open')) renderAnalytics();
   }
 }
 
@@ -2083,6 +2086,9 @@ function commitCell(el,s,r){
   applyStatusToCell(el,s,r);
   el.classList.add('edited');
   EDITS[el.dataset.k+'|'+el.dataset.sr+'|'+el.dataset.d+'|'+el.dataset.si]={s,r};
+  // Live refresh analytics if overlay is open
+  const ov=document.getElementById('analytics-overlay');
+  if(ov&&ov.classList.contains('open')) renderAnalytics();
 }
 function setActivePaint(s,r){
   activePaintStatus=s;
