@@ -1432,7 +1432,16 @@ function renderBoatBars(md, isScb){
   const el=document.getElementById('an-boat-bars');
   if(!el) return;
 
-  const boats=[...md.boats].filter(b=>b.total>0).sort((a,b)=>(b.avail/b.total)-(a.avail/a.total));
+  // Include ALL boats — those with total=0 (all N/no-data) show as 0% rather than being hidden
+  const boats=[...md.boats]
+    .filter(b=>b.total>0||(b.avail===0&&b.M===0&&b.S===0&&b.P===0&&b.W===0)) // keep no-data boats too
+    .sort((a,b)=>{
+      // Sort: boats with data first (by avail%), then no-data boats at end
+      if(a.total===0&&b.total>0) return 1;
+      if(b.total===0&&a.total>0) return -1;
+      if(a.total===0&&b.total===0) return 0;
+      return (b.avail/b.total)-(a.avail/a.total);
+    });
   if(!boats.length){ el.innerHTML='<p style="color:#5a6278;text-align:center;padding:20px">No data</p>'; return; }
 
   const maxDays=Math.max(...boats.map(b=>b.total));
