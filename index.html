@@ -3644,9 +3644,12 @@ function renderAnalytics(){
     });
   });
   const boatList = Object.entries(boatStats)
-    .filter(([,v])=>v.tot>0)
+    .filter(([,v])=>v.tot>0) // insights only for boats with actual data
     .map(([n,v])=>({name:n, pct:Math.round(100*v.a/v.tot), ...v}))
     .sort((a,b)=>b.pct-a.pct);
+  // Separately track boats that appear in the fleet but have zero data across all months
+  const noDataBoats = Object.entries(boatStats).filter(([,v])=>v.tot===0).map(([n])=>n);
+  if(noDataBoats.length) insights.push(`No data recorded for: <strong style="color:#5a6278">${noDataBoats.join(', ')}</strong> — cells may not have been filled in yet`);
   const bestBoat = boatList[0];
   const worstBoat = boatList[boatList.length-1];
   const mostM = [...boatList].sort((a,b)=>b.M-a.M)[0];
@@ -3787,7 +3790,7 @@ function renderBoatBars(md, isScb){
     });
   if(!boats.length){ el.innerHTML='<p style="color:#5a6278;text-align:center;padding:20px">No data</p>'; return; }
 
-  const maxDays=Math.max(...boats.map(b=>b.total));
+  const maxDays=Math.max(...boats.map(b=>b.total),1); // guard against all-zero case
   const BAR_W=42,GAP=14,PAD_L=34,PAD_R=12,PAD_T=18,PAD_B=58,CHART_H=200;
   const totalW=PAD_L+boats.length*(BAR_W+GAP)-GAP+PAD_R;
   const yS=function(v){return CHART_H-(v/maxDays)*CHART_H;};
@@ -3804,6 +3807,15 @@ function renderBoatBars(md, isScb){
 
   const bars=boats.map(function(b,i){
     const bx=PAD_L+i*(BAR_W+GAP);
+    const nx=bx+BAR_W/2, ny=PAD_T+CHART_H+14;
+    // No-data boat: show empty bar with dashed outline and '—' label
+    if(b.total===0){
+      return '<g>'+
+        '<rect x="'+bx+'" y="'+(PAD_T+CHART_H-4)+'" width="'+BAR_W+'" height="4" fill="rgba(255,255,255,0.06)" rx="1"/>'+
+        '<text x="'+nx+'" y="'+(PAD_T+CHART_H-8)+'" fill="#3a4468" font-size="9" text-anchor="middle">—</text>'+
+        '<text x="'+nx+'" y="'+ny+'" fill="#4a5478" font-size="9" text-anchor="middle" transform="rotate(-38,'+nx+','+ny+')">'+b.name+'</text>'+
+        '</g>';
+    }
     let sy=CHART_H;
     const segs=SEGS.filter(function(s){return (b[s.k]||0)>0;}).map(function(s){
       const h=(b[s.k]/maxDays)*CHART_H; sy-=h;
@@ -3813,7 +3825,6 @@ function renderBoatBars(md, isScb){
     const topY=PAD_T+CHART_H-totalH;
     const pct=Math.round(100*b.avail/b.total);
     const lc=pct>=80?'#7ED321':pct>=60?'#FF8C00':'#FF4444';
-    const nx=bx+BAR_W/2,ny=PAD_T+CHART_H+14;
     return '<g>'+segs+
       '<rect x="'+bx+'" y="'+topY+'" width="'+BAR_W+'" height="2.5" fill="'+lc+'" rx="1.5"/>'+
       '<text x="'+nx+'" y="'+(topY-6)+'" fill="'+lc+'" font-size="9" text-anchor="middle" font-weight="700">'+pct+'%</text>'+
