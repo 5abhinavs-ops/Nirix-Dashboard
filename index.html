@@ -368,6 +368,21 @@ select option { background:#0D1F3C;color:#FFFFFF; }
 #module-fleet .tt-r {font-size:11px;color:#c5cde8;line-height:1.4}
 #module-fleet .tt-h {font-size:10px;color:#ffc832;margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.08);display:none}
 
+/* ── CYBER INDIGO THEME OVERRIDES (applied via body.theme-cyber) ── */
+body.theme-cyber .hdr-title,
+#module-fleet.theme-cyber .hdr-sub { font-family:'Orbitron',sans-serif !important; letter-spacing:0.1em; }
+#module-fleet.theme-cyber .hdr-title { color:#00e5ff !important; font-size:13px !important; }
+#module-fleet.theme-cyber .mtitle { font-family:'Orbitron',sans-serif !important; letter-spacing:0.08em; color:#00e5ff !important; }
+#module-fleet.theme-cyber .mbar { border-bottom-color:rgba(43,51,198,0.4) !important; }
+#module-fleet.theme-cyber #left-nav { border-right-color:rgba(43,51,198,0.3) !important; }
+#module-fleet.theme-cyber .ln-lbl { color:#00e5ff !important; letter-spacing:0.15em; }
+#module-fleet.theme-cyber .ln-btn.active-scb { border-color:#00e5ff !important; color:#00e5ff !important; background:rgba(0,229,255,0.08) !important; }
+#module-fleet.theme-cyber .an-title, #module-fleet.theme-cyber .an-section-title { font-family:'Orbitron',sans-serif !important; letter-spacing:0.1em; }
+#module-fleet.theme-cyber .an-close { font-family:'Rajdhani',sans-serif !important; }
+#module-fleet.theme-cyber .thday { border-color:rgba(43,51,198,0.35) !important; }
+#module-fleet.theme-cyber .chip-green { color:#00e5ff !important; border-color:rgba(0,229,255,0.3) !important; background:rgba(0,229,255,0.08) !important; }
+#module-fleet.theme-cyber ::-webkit-scrollbar-thumb { background:#2b33c6 !important; }
+
 /* ── ANALYTICS OVERLAY ─────────────────────────────────────────────────── */
 #module-fleet #analytics-overlay {
   display:none;
@@ -1913,6 +1928,12 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         bg: '#130A06', nav: '#1E100A', surface: '#1A0E08',
         border: '#3A1A0A', accent: '#F97316', text: '#FFFFFF',
         textMuted: '#B89A7A', preview: ['#130A06','#1E100A','#F97316']
+      },
+      'cyber-indigo': {
+        name: 'Cyber Indigo',
+        bg: '#040510', nav: '#080B28', surface: '#0E1238',
+        border: '#2b33c6', accent: '#00e5ff', text: '#FFFFFF',
+        textMuted: '#8b92d6', preview: ['#040510','#0E1238','#00e5ff']
       }
     };
     const THEME_KEY = 'nirix_dashboard_theme';
@@ -1939,6 +1960,126 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       // Update login screen too
       const ls = document.getElementById('loginScreen');
       if(ls) ls.style.background = t.bg;
+      // Cyber Indigo special treatment — glow + glassmorphism body
+      if(themeId === 'cyber-indigo'){
+        document.body.style.backgroundImage = 'radial-gradient(circle at 50% 0%, #0d1240 0%, transparent 60%), radial-gradient(circle at 100% 50%, rgba(43,51,198,0.10) 0%, transparent 50%)';
+        document.body.style.fontFamily = "'Rajdhani','Segoe UI',sans-serif";
+        if(header){
+          header.style.boxShadow = '0 0 32px rgba(0,229,255,0.08)';
+          header.style.borderBottomColor = 'rgba(43,51,198,0.5)';
+        }
+        if(nav) nav.style.boxShadow = '0 2px 16px rgba(43,51,198,0.15)';
+        // Inject @keyframes glow pulse once
+        if(!document.getElementById('cyber-style')){
+          // Inject Google Fonts + full Cyber Indigo overrides
+          const link=document.createElement('link');
+          link.rel='stylesheet';
+          link.href='https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap';
+          document.head.appendChild(link);
+          const s=document.createElement('style');
+          s.id='cyber-style';
+          s.textContent=`
+            body.theme-cyber, body.theme-cyber button, body.theme-cyber select, body.theme-cyber input {
+              font-family: 'Rajdhani', 'Segoe UI', sans-serif !important;
+              letter-spacing: 0.03em;
+            }
+            body.theme-cyber h1, body.theme-cyber h2, body.theme-cyber h3,
+            body.theme-cyber .hdr-title, body.theme-cyber .hdr-sub,
+            body.theme-cyber #tab-daily > div:first-child,
+            body.theme-cyber #tab-runhrs > div:first-child,
+            body.theme-cyber #tab-boatspecs > div:first-child,
+            body.theme-cyber #tab-certs > div:first-child {
+              font-family: 'Orbitron', sans-serif !important;
+              text-transform: uppercase;
+              letter-spacing: 0.12em;
+            }
+            body.theme-cyber #module-nav > div > div:first-child {
+              font-family: 'Orbitron', sans-serif !important;
+              font-size: 13px !important;
+              letter-spacing: 0.1em;
+            }
+            body.theme-cyber * { transition: border-color .2s, box-shadow .2s, background .2s; }
+            body.theme-cyber ::-webkit-scrollbar-thumb { background:#2b33c6 !important; }
+            body.theme-cyber #header {
+              border-bottom: 1px solid rgba(43,51,198,0.5) !important;
+              box-shadow: 0 0 40px rgba(0,229,255,0.06) !important;
+            }
+            body.theme-cyber #module-nav {
+              border-bottom: 1px solid rgba(43,51,198,0.4) !important;
+            }
+            body.theme-cyber #module-nav > div {
+              border-color: rgba(43,51,198,0.4) !important;
+            }
+            body.theme-cyber .stab.on, body.theme-cyber .ttab.on {
+              border-bottom-color: #00e5ff !important;
+              color: #00e5ff !important;
+            }
+            body.theme-cyber .stab:hover, body.theme-cyber .ttab:hover {
+              color: #00e5ff !important;
+            }
+            body.theme-cyber #left-nav {
+              border-right: 1px solid rgba(43,51,198,0.3) !important;
+            }
+            body.theme-cyber .ln-btn.active-scb {
+              border-color: #00e5ff !important;
+              color: #00e5ff !important;
+              background: rgba(0,229,255,0.08) !important;
+            }
+            body.theme-cyber #settings-btn {
+              border-color: rgba(0,229,255,0.35) !important;
+              box-shadow: 0 0 8px rgba(0,229,255,0.2) !important;
+            }
+            body.theme-cyber #settings-btn:hover {
+              box-shadow: 0 0 16px rgba(0,229,255,0.5) !important;
+              border-color: #00e5ff !important;
+            }
+            body.theme-cyber #settings-popup {
+              border-color: rgba(43,51,198,0.6) !important;
+              box-shadow: 0 16px 48px rgba(0,229,255,0.12), 0 0 0 1px rgba(0,229,255,0.05) !important;
+            }
+            body.theme-cyber .sp-tab.active {
+              border-bottom-color: #00e5ff !important;
+              color: #00e5ff !important;
+            }
+            body.theme-cyber .sp-popup-title {
+              font-family: 'Orbitron', sans-serif !important;
+              letter-spacing: 0.1em;
+              color: #00e5ff !important;
+            }
+            body.theme-cyber .sp-section-label {
+              color: #00e5ff !important;
+              letter-spacing: 0.15em;
+            }
+            body.theme-cyber .sp-theme-dropdown {
+              border-color: rgba(43,51,198,0.5) !important;
+              font-family: 'Rajdhani', sans-serif !important;
+            }
+            body.theme-cyber .sp-theme-dropdown:hover {
+              border-color: #00e5ff !important;
+              box-shadow: 0 0 8px rgba(0,229,255,0.15) !important;
+            }
+            body.theme-cyber .hdr-title {
+              font-family: 'Orbitron', sans-serif !important;
+              letter-spacing: 0.15em !important;
+              font-size: 14px !important;
+              color: #00e5ff !important;
+            }
+            body.theme-cyber .chip-green {
+              border-color: rgba(0,229,255,0.3) !important;
+              color: #00e5ff !important;
+              background: rgba(0,229,255,0.08) !important;
+            }
+          `;
+          document.head.appendChild(s);
+        }
+        document.body.classList.add('theme-cyber');
+      } else {
+        document.body.style.backgroundImage = '';
+        document.body.style.fontFamily = '';
+        if(header) header.style.boxShadow = '';
+        if(nav) nav.style.boxShadow = '';
+        document.body.classList.remove('theme-cyber');
+      }
       // Save
       try { localStorage.setItem(THEME_KEY, themeId); } catch(e){}
       // Update preview
@@ -3132,6 +3273,7 @@ window.initFleetModule=function(){
           <option value="steel-slate">Steel Slate</option>
           <option value="forest-dark">Forest Dark</option>
           <option value="ember-dark">Ember Dark</option>
+          <option value="cyber-indigo">⚡ Cyber Indigo</option>
         </select>
         <div class="sp-theme-preview" id="sp-theme-preview"></div>
         <div class="sp-theme-hint">Theme is saved per browser session</div>
