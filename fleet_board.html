@@ -62,41 +62,200 @@ select.ln-sel option{background:#1a2340;color:#c5cde8}
 /* Content area pushed right by left nav */
 .main-content{margin-left:180px}
 
-/* KPI */
-.kpi-strip{background:var(--white);border-bottom:1px solid var(--border);padding:10px 20px;display:flex}
-.kpi{flex:1;padding:6px 16px;border-right:1px solid var(--border);text-align:center}
-.kpi:last-child{border-right:none}
-.kpi-n{font-size:26px;font-weight:700;line-height:1;margin-bottom:3px}
-.kpi-l{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
-.kpi-s{font-size:10px;margin-top:2px;color:var(--text3)}
-.kg .kpi-n{color:#2a8040} .kr .kpi-n{color:#c0392b} .ko .kpi-n{color:#d4620a}
-.kb .kpi-n{color:#1a6fb5} .kp .kpi-n{color:#6b31b0}
+/* ── FONT IMPORT ── */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Chakra+Petch:wght@400;600;700&display=swap');
 
-/* MONTH BAR */
-.mbar{background:var(--white);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;align-items:center;gap:12px}
-.mtitle{font-size:15px;font-weight:700}
-.mmeta{font-size:12px;color:var(--text2)}
-.daynav{display:flex;align-items:center;gap:6px;margin-left:auto}
-.dnbtn{background:var(--bg);border:1px solid var(--border-dark);color:var(--text2);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer}
-.dnbtn:hover{background:var(--border-dark)}
-.dnbtn.today{background:#1a2340;border-color:#1a2340;color:#5bc4a8;font-weight:600}
-.dayind{font-size:13px;font-weight:600;background:var(--bg);border:1px solid var(--border-dark);border-radius:6px;padding:5px 14px}
+/* ── INTERNAL CONTENT AREA VARIABLES ── */
+:root {
+  --inner-bg: #0b1120;
+  --inner-panel: #0d1b2e;
+  --inner-panel2: #102035;
+  --inner-border: rgba(255,255,255,0.07);
+  --inner-border-strong: rgba(255,255,255,0.12);
+  --inner-text: #c8d6e5;
+  --inner-muted: #5a7a96;
+}
 
-/* TABLE */
-.twrap{overflow:auto;max-height:calc(100vh - 168px)}
-table{border-collapse:collapse;table-layout:fixed;font-size:11.5px;background:var(--white)}
-th,td{border:1px solid var(--border);white-space:nowrap;overflow:hidden;padding:0}
+/* ── BODY & MAIN CONTENT BACKGROUND ── */
+body { background: var(--inner-bg) !important; }
+.main-content { background: var(--inner-bg) !important; }
 
-.thday{background:var(--col);color:var(--col-txt);font-size:10px;font-weight:600;text-align:center;padding:4px 2px;position:sticky;top:0;z-index:20;width:32px;min-width:32px;max-width:32px;cursor:pointer}
-.thday:hover{background:#3a4d82}
-.thday.sc{background:#2d9e7a!important;color:#fff!important}
-.thdow{font-size:9px;color:rgba(197,205,232,.5);text-transform:uppercase}
-.thlabels{background:var(--col);position:sticky;top:0;left:0;z-index:30;width:162px;min-width:162px}
-.thsum{background:#253055;color:#a0b0cc;font-size:10px;font-weight:600;text-align:center;padding:4px 2px;position:sticky;top:0;z-index:20;width:65px;min-width:65px}
+/* KPI STRIP — dark dashboard style matching reference */
+.kpi-strip {
+  background: var(--inner-panel) !important;
+  border-bottom: 1px solid var(--inner-border-strong) !important;
+  padding: 0 !important;
+  display: flex !important;
+  gap: 0 !important;
+}
+.kpi {
+  flex: 1;
+  padding: 18px 20px 14px !important;
+  border-right: 1px solid var(--inner-border) !important;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s;
+}
+.kpi:last-child { border-right: none !important; }
+.kpi:hover { background: var(--inner-panel2) !important; }
+/* Top colour bar — the "glow bar" at top of each KPI card */
+.kpi::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: currentColor;
+  opacity: 0.4;
+}
+.kg::before { background: linear-gradient(to right, transparent, #00c853, transparent); opacity:1; }
+.kr::before { background: linear-gradient(to right, transparent, #ff1744, transparent); opacity:1; }
+.ko::before { background: linear-gradient(to right, transparent, #ff6d00, transparent); opacity:1; }
+.kb::before { background: linear-gradient(to right, transparent, #2979ff, transparent); opacity:1; }
+.kp::before { background: linear-gradient(to right, transparent, #aa00ff, transparent); opacity:1; }
+/* KPI number — large, colour-coded, Chakra Petch */
+.kpi-n {
+  font-family: 'Chakra Petch', monospace !important;
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  line-height: 1;
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+/* KPI label */
+.kpi-l {
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--inner-text) !important;
+  opacity: 0.85;
+}
+/* KPI sub-label */
+.kpi-s {
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 10px !important;
+  margin-top: 3px;
+  color: var(--inner-muted) !important;
+}
+/* Colour-coded numbers — brighter for dark bg */
+.kg .kpi-n { color: #00e676 !important; text-shadow: 0 0 12px rgba(0,230,118,0.4); }
+.kr .kpi-n { color: #ff1744 !important; text-shadow: 0 0 12px rgba(255,23,68,0.4); }
+.ko .kpi-n { color: #ff6d00 !important; text-shadow: 0 0 12px rgba(255,109,0,0.4); }
+.kb .kpi-n { color: #448aff !important; text-shadow: 0 0 12px rgba(68,138,255,0.4); }
+.kp .kpi-n { color: #e040fb !important; text-shadow: 0 0 12px rgba(224,64,251,0.4); }
 
-.tdsr{background:#f0f2f8;color:var(--text2);font-size:10px;text-align:center;font-weight:600;width:30px;min-width:30px;max-width:30px;padding:0 2px;position:sticky;left:0;z-index:10;box-shadow:2px 0 3px rgba(0,0,0,.06)}
-.tdname{background:#f0f2f8;font-weight:700;font-size:11.5px;width:90px;min-width:90px;max-width:90px;padding:2px 6px;position:sticky;left:30px;z-index:10;border-right:2px solid var(--border-dark)!important;box-shadow:2px 0 3px rgba(0,0,0,.06)}
-.tdslot{background:#f0f2f8;color:var(--text3);font-size:9.5px;width:42px;min-width:42px;max-width:42px;padding:1px 4px;text-align:center}
+/* MONTH BAR — dark */
+.mbar {
+  background: var(--inner-panel) !important;
+  border-bottom: 1px solid var(--inner-border-strong) !important;
+  padding: 8px 20px !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mtitle {
+  font-family: 'Chakra Petch', monospace !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em;
+  color: #c8d6e5 !important;
+  text-transform: uppercase;
+}
+.mmeta {
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 12px !important;
+  color: var(--inner-muted) !important;
+}
+.daynav { display:flex;align-items:center;gap:6px;margin-left:auto; }
+.dnbtn {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  color: #8aa8c0 !important;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-family: 'Rajdhani', sans-serif !important;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.dnbtn:hover {
+  background: rgba(255,255,255,0.1) !important;
+  border-color: rgba(255,255,255,0.25) !important;
+  color: #fff !important;
+}
+.dnbtn.today {
+  background: rgba(0,180,100,0.15) !important;
+  border-color: #00c853 !important;
+  color: #00e676 !important;
+  font-weight: 700 !important;
+}
+.dayind {
+  font-family: 'Chakra Petch', monospace !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  color: #c8d6e5 !important;
+  border-radius: 6px;
+  padding: 5px 14px;
+}
+
+/* TABLE — dark theme */
+.twrap { overflow:auto;max-height:calc(100vh - 168px); background: var(--inner-bg) !important; }
+table { border-collapse:collapse;table-layout:fixed;font-size:11.5px;background:var(--inner-bg) !important; }
+th,td { border:1px solid rgba(255,255,255,0.07) !important;white-space:nowrap;overflow:hidden;padding:0; }
+
+/* Column header (day numbers row) */
+.thday {
+  background: #0f2040 !important;
+  color: #8aa8c0 !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-align: center;
+  padding: 4px 2px;
+  position: sticky; top:0; z-index:20;
+  width:32px;min-width:32px;max-width:32px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.thday:hover { background: #1a3060 !important; color: #fff !important; }
+.thday.sc { background: #0a3020 !important; color: #00e676 !important; box-shadow: inset 0 -2px 0 #00e676; }
+.thdow { font-size:9px;color:rgba(100,140,180,0.5);text-transform:uppercase; }
+.thlabels { background:#0c1830 !important;position:sticky;top:0;left:0;z-index:30;width:162px;min-width:162px; }
+.thsum { background:#0c1830 !important;color:#5a7a96 !important;font-family:'Rajdhani',sans-serif !important;font-size:10px;font-weight:700;text-align:center;padding:4px 2px;position:sticky;top:0;z-index:20;width:65px;min-width:65px; }
+
+/* Row label cells */
+.tdsr {
+  background: #0c1830 !important;
+  color: #5a7a96 !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 11px !important;
+  text-align:center;font-weight:700;
+  width:30px;min-width:30px;max-width:30px;padding:0 2px;
+  position:sticky;left:0;z-index:10;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.3);
+}
+.tdname {
+  background: #0c1830 !important;
+  color: #c8d6e5 !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  width:90px;min-width:90px;max-width:90px;padding:2px 8px;
+  position:sticky;left:30px;z-index:10;
+  border-right: 2px solid rgba(255,255,255,0.12) !important;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.3);
+}
+.tdslot {
+  background: #0c1830 !important;
+  color: #3a5a76 !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 9.5px;
+  width:42px;min-width:42px;max-width:42px;padding:1px 4px;text-align:center;
+}
 
 /* STATUS CELLS */
 .cell{width:32px;min-width:32px;max-width:32px;height:18px;cursor:default;position:relative;transition:background .1s}
@@ -107,7 +266,16 @@ th,td{border:1px solid var(--border);white-space:nowrap;overflow:hidden;padding:
 .sP{background:#FF66FF}
 .sW{background:#ED7D31}
 
-.sN{background:#e8eaee}
+/* Empty cell — very dark, barely visible grid */
+.sN { background: #0d1a2d !important; }
+
+/* Avail% and Days↓ cells — dark base */
+.tdpct { background: #0c1830 !important; color: #c8d6e5 !important; font-family: 'Rajdhani', sans-serif !important; font-weight: 700; }
+.tddown { background: #0c1830 !important; font-family: 'Rajdhani', sans-serif !important; }
+
+/* Fleet separator rows */
+.bdiv td { background: var(--inner-bg) !important; border-top: 2px solid rgba(255,255,255,0.08) !important; height: 4px; }
+.fsep td { background: #0c1830 !important; color: #8aa8c0 !important; font-family: 'Chakra Petch', monospace !important; letter-spacing: 0.06em; font-size: 11px; padding: 5px 8px; border-top: 1px solid rgba(255,255,255,0.08) !important; }
 
 /* Edit mode */
 body.emode .cell{cursor:crosshair}
