@@ -311,8 +311,7 @@ select option { background:#0D1F3C;color:#FFFFFF; }
 #module-fleet .an-grid {display:grid;grid-template-columns:1fr 1fr;gap:20px}
 #module-fleet .an-card {background:#1a2340;border-radius:12px;padding:18px 20px;
   border:1px solid rgba(255,255,255,.06)}
-#module-fleet .an-card-title {font-size:12px;font-weight:700;color:#8892b8;
-  text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+#module-fleet .an-card-title {display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#c5cde8;background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:5px 14px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px}
 #module-fleet .an-chart-wrap {position:relative}
 
 #module-fleet .an-insights {background:rgba(91,196,168,.08);border:1px solid rgba(91,196,168,.2);
@@ -2408,7 +2407,7 @@ function renderAnalytics(){
     <div class="an-section">
       <div class="an-section-title">Monthly Availability Trend</div>
       <div class="an-card">
-        <div class="an-card-title">Fleet Availability % by Month</div>
+        <div class="an-card-title">📈 Fleet Availability % by Month</div>
         <div class="an-chart-wrap" style="height:220px">
           <canvas id="an-trend-chart"></canvas>
         </div>
@@ -2417,15 +2416,15 @@ function renderAnalytics(){
 
     <!-- Per-boat bars + pie -->
     <div class="an-section">
-      <div class="an-section-title">Boat-Level Breakdown</div>
+      <div class="an-section-title">Boat Breakdown Cause Analysis</div>
       <div class="an-month-tabs" id="an-month-tabs"></div>
       <div class="an-grid">
         <div class="an-card">
-          <div class="an-card-title">Availability per Boat — <span id="an-sel-month-lbl">${selML}</span></div>
+          <div class="an-card-title">⚓ Availability per Boat — <span id="an-sel-month-lbl">${selML}</span></div>
           <div id="an-boat-bars"></div>
         </div>
         <div class="an-card">
-          <div class="an-card-title">Combined Downtime Breakdown (All Months)</div>
+          <div class="an-card-title">🔴 Combined Downtime Breakdown</div>
           <div class="an-chart-wrap" style="height:240px">
             <canvas id="an-pie-chart"></canvas>
           </div>
@@ -2449,9 +2448,9 @@ function renderAnalytics(){
     if(!monthData[m]) return;
     const btn=document.createElement('button');
     btn.className='an-mtab'+(m===anMK?' '+(isScb?'active-scb':'active-sgs'):'');
-    btn.textContent=(ML[m]||m).replace(' 2025','').replace(' 2026','');
+    btn.textContent=(function(mk){ const p=mk.split('_'); return p[0]+' '+(p[1]||'').slice(2); })(m);
     btn.onclick=()=>{ anMK=m; renderBoatBars(monthData[m],isScb); 
-      document.getElementById('an-sel-month-lbl').textContent=ML[m]||m;
+      document.getElementById('an-sel-month-lbl').textContent=(function(mk){ const p=mk.split('_'); return p[0]+' '+(p[1]||'').slice(2); })(m);
       tabsEl.querySelectorAll('.an-mtab').forEach(b=>b.className='an-mtab');
       btn.className='an-mtab '+(isScb?'active-scb':'active-sgs');
     };
