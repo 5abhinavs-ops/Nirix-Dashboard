@@ -1,8 +1,8 @@
 const FIREBASE_CONFIG = {
-  apiKey: "PLACEHOLDER — I will fill this in",
-  authDomain: "PLACEHOLDER",
-  projectId: "PLACEHOLDER",
-  storageBucket: "PLACEHOLDER",
-  messagingSenderId: "PLACEHOLDER",
-  appId: "PLACEHOLDER"
+  apiKey: "AIzaSyBo_bn9Or3IiekHfyNt8uK8SY5EgkQBLtY",
+  authDomain: "nirix-dashboard.firebaseapp.com",
+  projectId: "nirix-dashboard",
+  storageBucket: "nirix-dashboard.firebasestorage.app",
+  messagingSenderId: "310409738035",
+  appId: "1:310409738035:web:b69632c4ac0ebf0a40f046"
 };
