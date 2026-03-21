@@ -1116,7 +1116,7 @@ function renderAnalytics(){
     <div class="an-section">
       <div class="an-section-title">Monthly Availability Trend</div>
       <div class="an-card">
-        <div class="an-card-title">📈 Fleet Availability % by Month</div>
+        <div class="an-card-title"><span style="display:inline-block;background:rgba(91,196,168,.15);border:1px solid rgba(91,196,168,.35);color:#5bc4a8;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:.03em">📈 Monthly Trend</span></div>
         <div class="an-chart-wrap" style="height:220px">
           <canvas id="an-trend-chart"></canvas>
         </div>
@@ -1125,15 +1125,15 @@ function renderAnalytics(){
 
     <!-- Per-boat bars + pie -->
     <div class="an-section">
-      <div class="an-section-title">Boat Breakdown Cause Analysis</div>
+      <div class="an-section-title">Fleet Breakdown Cause Analysis</div>
       <div class="an-month-tabs" id="an-month-tabs"></div>
       <div class="an-grid">
         <div class="an-card">
-          <div class="an-card-title">⚓ Availability per Boat — <span id="an-sel-month-lbl">${selML}</span></div>
+          <div class="an-card-title"><span style="display:inline-block;background:rgba(91,196,168,.15);border:1px solid rgba(91,196,168,.35);color:#5bc4a8;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700">📊 Availability per Boat</span> <span style="display:inline-block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#c5cde8;border-radius:20px;padding:3px 10px;font-size:10px" id="an-sel-month-lbl">${selML}</span></div>
           <div id="an-boat-bars"></div>
         </div>
         <div class="an-card">
-          <div class="an-card-title">🔴 Combined Downtime Breakdown</div>
+          <div class="an-card-title"><span style="display:inline-block;background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.3);color:#ff8888;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700">🔍 Downtime Breakdown</span> <span style="display:inline-block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#8892b8;border-radius:20px;padding:3px 10px;font-size:10px">All Months</span></div>
           <div class="an-chart-wrap" style="height:240px">
             <canvas id="an-pie-chart"></canvas>
           </div>
@@ -1157,9 +1157,9 @@ function renderAnalytics(){
     if(!monthData[m]) return;
     const btn=document.createElement('button');
     btn.className='an-mtab'+(m===anMK?' '+(isScb?'active-scb':'active-sgs'):'');
-    btn.textContent=(function(mk){ const p=mk.split('_'); return p[0]+' '+(p[1]||'').slice(2); })(m);
+    const _p=m.split('_'); btn.textContent=_p[0].slice(0,3)+' '+(_p[1]||'').slice(2);
     btn.onclick=()=>{ anMK=m; renderBoatBars(monthData[m],isScb); 
-      document.getElementById('an-sel-month-lbl').textContent=(function(mk){ const p=mk.split('_'); return p[0]+' '+(p[1]||'').slice(2); })(m);
+      document.getElementById('an-sel-month-lbl').textContent=m.split('_')[0].slice(0,3)+' '+(m.split('_')[1]||'').slice(2);
       tabsEl.querySelectorAll('.an-mtab').forEach(b=>b.className='an-mtab');
       btn.className='an-mtab '+(isScb?'active-scb':'active-sgs');
     };
@@ -1252,7 +1252,7 @@ function drawTrendChart(data, accentCol){
   const ch=new Chart(ctx,{
     type:'bar',
     data:{
-      labels:data.map(d=>d.m.replace(' 2025','').replace(' 2026','')),
+      labels:data.map(d=>{ const p=d.m.split(' '); return p[0].slice(0,3)+(p[1]?' '+p[1].slice(2):''); }),
       datasets:[{
         label:'Availability %',
         data:data.map(d=>d.pct),
