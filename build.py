@@ -378,6 +378,9 @@ window.commitCell=commitCell=function(el,s,r){
   _undoStack.push({el:el,oldS:el.dataset.s||'N',oldR:el.dataset.r||'',wasEdited:el.classList.contains('edited')});
   if(_undoStack.length>50)_undoStack.shift();
   applyStatusToCell(el,s,r); el.classList.add('edited'); EDITS[ek]={s:s,r:r};
+  // Live refresh analytics if overlay is open
+  var ov=document.getElementById('analytics-overlay');
+  if(ov&&ov.classList.contains('open')) renderAnalytics();
 };
 
 // Drag + localStorage for popup position
