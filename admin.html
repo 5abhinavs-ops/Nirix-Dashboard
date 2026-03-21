@@ -82,6 +82,61 @@
     #gate { text-align: center; padding: 48px 20px; color: #8AA8C0; font-size: 14px; }
     #app-root { display: none; }
     label.chk { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #C0D0E0; cursor: pointer; margin-right: 10px; }
+
+    /* ── PERMISSIONS TABLE ── */
+    .perm-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .perm-table th {
+      color: #7A9AB0;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 8px 12px;
+      border-bottom: 1px solid #1A3050;
+      text-align: center;
+    }
+    .perm-table th:first-child { text-align: left; }
+    .perm-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #0D1A2E;
+      text-align: center;
+      color: #8AA8C0;
+      font-size: 11px;
+    }
+    .perm-table td:first-child {
+      text-align: left;
+      color: #C0D4E8;
+      font-weight: 500;
+      font-size: 12px;
+    }
+    .perm-table tr:last-child td { border-bottom: none; }
+    .perm-table tr:hover td { background: rgba(13,154,170,0.04); }
+    .perm-section td:first-child {
+      color: #5A7A9A;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding-top: 16px;
+      padding-bottom: 4px;
+    }
+    .perm-section td { border-bottom: none; background: transparent !important; }
+    .tick  { color: #5BC4A8; font-size: 15px; }
+    .cross { color: #4A6A8A; font-size: 15px; }
+    .partial { color: #E0A050; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; }
+    .role-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .badge-admin   { background: rgba(13,154,170,0.18); color: #0D9AAA; border: 1px solid rgba(13,154,170,0.3); }
+    .badge-manager { background: rgba(90,184,232,0.12); color: #5AB8E8; border: 1px solid rgba(90,184,232,0.25); }
+    .badge-viewer  { background: rgba(90,120,160,0.15); color: #7A9AB0; border: 1px solid rgba(90,120,160,0.25); }
+    .badge-vplus   { background: rgba(224,160,80,0.12); color: #E0A050; border: 1px solid rgba(224,160,80,0.25); }
+    .badge-blocked { background: rgba(224,90,90,0.12);  color: #E05A5A; border: 1px solid rgba(224,90,90,0.25); }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -97,6 +152,168 @@
       <button type="button" class="btn-signout" id="btn-signout">Sign out</button>
     </header>
     <main>
+
+      <!-- ── PERMISSIONS REFERENCE TABLE ── -->
+      <div class="panel">
+        <h2>Role permissions reference</h2>
+        <div style="overflow-x:auto">
+          <table class="perm-table">
+            <thead>
+              <tr>
+                <th style="min-width:200px">Capability</th>
+                <th><span class="role-badge badge-admin">Admin</span></th>
+                <th><span class="role-badge badge-manager">Manager</span></th>
+                <th><span class="role-badge badge-viewer">Viewer</span></th>
+                <th><span class="role-badge badge-vplus">Viewer+</span></th>
+                <th><span class="role-badge badge-blocked">Blocked</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Access -->
+              <tr class="perm-section"><td colspan="6">Access</td></tr>
+              <tr>
+                <td>Login to dashboard</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>View all modules</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>Open Admin Panel</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>Nirix logo clickable</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+
+              <!-- Certification -->
+              <tr class="perm-section"><td colspan="6">Certification module</td></tr>
+              <tr>
+                <td>View &amp; download certificates</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>Edit certificate name</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>Edit expiry date</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="partial">If granted</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>Edit renewal window</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>Upload certificate files</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="partial">If granted</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>Add new certificate row</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>Delete certificate rows</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>Delete uploaded files</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+
+              <!-- Other modules -->
+              <tr class="perm-section"><td colspan="6">Other modules</td></tr>
+              <tr>
+                <td>Daily Reports — view</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>Engine Run-hrs — view</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>Boat Tech. Specs — view</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+              <tr>
+                <td>Fleet Availability — view &amp; edit</td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="tick">✓</span></td>
+                <td><span class="cross">✕</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px;font-size:10px;color:#4A6A8A;line-height:1.6">
+          <span style="color:#E0A050;font-weight:600">Viewer+</span> — same as Viewer with optional extra permissions granted individually per user (editExpiry, upload). Configure in the Users table below.
+        </div>
+      </div>
+
+      <!-- ── ADD USER ── -->
       <div class="panel">
         <h2>Add user</h2>
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
@@ -116,6 +333,8 @@
         </div>
         <div id="create-msg" class="msg"></div>
       </div>
+
+      <!-- ── USERS TABLE ── -->
       <div class="panel">
         <h2>Users</h2>
         <div style="overflow-x:auto">
