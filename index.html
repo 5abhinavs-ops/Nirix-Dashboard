@@ -2276,10 +2276,14 @@ function buildDD(){
 }
 function toggleMonthPicker(){
   const p=document.getElementById('month-picker'); if(!p) return;
-  p.style.display=p.style.display==='none'?'block':'none';
+  const open=p.style.display==='none';
+  p.style.display=open?'block':'none';
+  const arr=document.getElementById('mtitle-arrow');
+  if(arr) arr.style.transform=open?'rotate(180deg)':'';
 }
 function closeMonthPicker(){
   const p=document.getElementById('month-picker'); if(p) p.style.display='none';
+  const arr=document.getElementById('mtitle-arrow'); if(arr) arr.style.transform='';
 }
 function render(){ buildDD(); renderKPI(); renderTable(); }
 
@@ -2976,9 +2980,11 @@ window.initFleetModule=function(){
 
 <div class="mbar">
   <div style="position:relative;display:inline-block">
-    <span class="mtitle" id="mtitle" onclick="toggleMonthPicker()" style="cursor:pointer;user-select:none" title="Click to change month">— <span style="font-size:10px;color:#8892b8">&#9660;</span></span>
+    <button id="mtitle" onclick="toggleMonthPicker()" style="cursor:pointer;user-select:none;background:#1a2340;border:1px solid rgba(255,255,255,.15);color:#e8ecf8;border-radius:8px;padding:6px 14px;font-size:14px;font-weight:700;font-family:inherit;display:inline-flex;align-items:center;gap:8px;transition:all .15s;outline:none" onmouseover="this.style.borderColor='rgba(255,255,255,.4)';this.style.background='#253055'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.background='#1a2340'">—
+      <svg width="10" height="6" viewBox="0 0 10 6" style="flex-shrink:0;transition:transform .2s" id="mtitle-arrow"><path d="M0 0l5 6 5-6z" fill="#8892b8"/></svg>
+    </button>
     <span class="mmeta" id="mmeta"></span>
-    <div id="month-picker" style="display:none;position:absolute;top:100%;left:0;background:#1a2340;border:1px solid rgba(255,255,255,.18);border-radius:8px;z-index:500;min-width:110px;box-shadow:0 8px 24px rgba(0,0,0,.5);padding:4px 0;margin-top:4px"></div>
+    <div id="month-picker" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:#1a2340;border:1px solid rgba(255,255,255,.18);border-radius:10px;z-index:500;min-width:120px;box-shadow:0 8px 32px rgba(0,0,0,.6);padding:6px 0;margin-top:0"></div>
   </div>
   <div class="daynav">
     <button class="dnbtn" onclick="shiftDay(-1)">← Prev</button>
