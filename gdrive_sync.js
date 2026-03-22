@@ -16,8 +16,7 @@ async function n8nSave() {
     const res = await fetch(SAVE_PATH, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-nirix-secret': N8N_SECRET
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(window.D || D)
     });
@@ -40,7 +39,7 @@ async function n8nLoad() {
   try {
     const res = await fetch(LOAD_PATH, {
       method: 'GET',
-      headers: { 'x-nirix-secret': N8N_SECRET }
+      headers: {}
     });
     if (res.status === 404) {
       _showSyncStatus('No saved data yet', 'warn');
