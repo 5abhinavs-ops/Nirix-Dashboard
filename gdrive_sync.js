@@ -3,10 +3,8 @@
 // No OAuth, no popup — credentials stay in n8n.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const N8N_BASE    = 'https://abnv5.app.n8n.cloud/webhook';
-const N8N_SECRET  = 'nirix2026fleet';
-const SAVE_PATH   = N8N_BASE + '/nirix-fleet-save';
-const LOAD_PATH   = N8N_BASE + '/nirix-fleet-load';
+const SAVE_PATH   = '/api/fleet-save/';
+const LOAD_PATH   = '/api/fleet-load/';
 
 // ── SAVE ─────────────────────────────────────────────────────────────────────
 

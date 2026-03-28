@@ -1810,7 +1810,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     }
 
 
-    const BOAT_SPECS_URL = 'https://abnv5.app.n8n.cloud/webhook/boat-specs';
+    const BOAT_SPECS_URL = '/api/boat-specs/';
     let _bsLoaded = false;
 
     async function loadBoatSpecs(){
@@ -4731,10 +4731,8 @@ window.initFleetModule=function(){
 // No OAuth, no popup — credentials stay in n8n.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const N8N_BASE    = 'https://abnv5.app.n8n.cloud/webhook';
-const N8N_SECRET  = 'nirix2026fleet';
-const SAVE_PATH   = N8N_BASE + '/nirix-fleet-save';
-const LOAD_PATH   = N8N_BASE + '/nirix-fleet-load';
+const SAVE_PATH   = '/api/fleet-save/';
+const LOAD_PATH   = '/api/fleet-load/';
 
 // ── SAVE ─────────────────────────────────────────────────────────────────────
 
