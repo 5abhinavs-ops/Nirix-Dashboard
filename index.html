@@ -2900,52 +2900,6 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
             body.theme-scifi .theme-boat-card.status-critical::before { background: rgba(255,42,42,0.6); }
             body.theme-scifi .theme-boat-card.status-critical:hover::before { background: #ff2a2a !important; box-shadow: 0 0 8px rgba(255,42,42,0.8); }
 
-            /* ── SETTINGS BTN ── */
-            body.theme-scifi #settings-btn {
-              background: rgba(10,17,34,0.8) !important;
-              border: 1px solid rgba(30,58,138,0.5) !important;
-              clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px) !important;
-              border-radius: 0 !important;
-            }
-            body.theme-scifi #settings-btn:hover {
-              border-color: #00f0ff !important;
-              box-shadow: 0 0 12px rgba(0,240,255,0.4) !important;
-            }
-
-            /* ── SETTINGS POPUP ── */
-            body.theme-scifi #settings-popup {
-              background: rgba(10,17,34,0.95) !important;
-              border: 1px solid rgba(30,58,138,0.7) !important;
-              border-radius: 0 !important;
-              clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px) !important;
-              box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 20px rgba(0,240,255,0.06) !important;
-              backdrop-filter: blur(16px) !important;
-            }
-            body.theme-scifi .sp-popup-title {
-              font-family: 'Chakra Petch', monospace !important;
-              color: #00f0ff !important;
-              text-shadow: 0 0 8px rgba(0,240,255,0.5);
-              letter-spacing: 0.1em;
-            }
-            body.theme-scifi .sp-tab.active {
-              color: #00f0ff !important;
-              border-bottom-color: #00f0ff !important;
-              text-shadow: 0 0 6px rgba(0,240,255,0.4);
-            }
-            body.theme-scifi .sp-section-label {
-              font-family: 'Chakra Petch', monospace !important;
-              color: rgba(0,240,255,0.8) !important;
-              letter-spacing: 0.12em;
-            }
-            body.theme-scifi .sp-theme-dropdown {
-              background: rgba(10,17,34,0.8) !important;
-              border: 1px solid rgba(30,58,138,0.6) !important;
-              font-family: 'Chakra Petch', monospace !important;
-              border-radius: 0 !important;
-              clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px) !important;
-            }
-            body.theme-scifi .sp-theme-dropdown:hover { border-color: #00f0ff !important; }
-
             /* ── MODALS ── */
             body.theme-scifi #modalOverlay > div,
             body.theme-scifi #certDocOverlay > div {
@@ -3027,26 +2981,8 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
               border-radius: 6px 6px 0 0;
             }
 
-            /* Settings popup: glass surface with 16px radius */
-            body.theme-cyber #settings-popup {
-              border-radius: 16px !important;
-              background: rgba(14,18,56,0.85) !important;
-              backdrop-filter: blur(16px) !important;
-              -webkit-backdrop-filter: blur(16px) !important;
-              border: 1px solid rgba(139,146,214,0.18) !important;
-              border-top: 1px solid rgba(255,255,255,0.10) !important;
-            }
-
-            /* Settings gear button: pill shape */
-            body.theme-cyber #settings-btn {
-              border-radius: 50% !important;
-              width: 30px !important;
-              height: 30px !important;
-            }
-
             /* Buttons: pill shape (radius-pill = 999px) */
             body.theme-cyber button.ln-btn,
-            body.theme-cyber .sp-popup-close,
             body.theme-cyber .cert-add-btn,
             body.theme-cyber .cert-view-btn span {
               border-radius: 999px !important;
@@ -3054,8 +2990,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
 
             /* Left rail / nav panels: glass surface */
             body.theme-cyber #left-rail,
-            body.theme-cyber #left-nav,
-            body.theme-cyber .sp-tab-bar {
+            body.theme-cyber #left-nav {
               background: rgba(10,14,40,0.6) !important;
               backdrop-filter: blur(10px);
             }
@@ -3170,39 +3105,6 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
               border-color: #00e5ff !important;
               color: #00e5ff !important;
               background: rgba(0,229,255,0.08) !important;
-            }
-            body.theme-cyber #settings-btn {
-              border-color: rgba(0,229,255,0.35) !important;
-              box-shadow: 0 0 8px rgba(0,229,255,0.2) !important;
-            }
-            body.theme-cyber #settings-btn:hover {
-              box-shadow: 0 0 16px rgba(0,229,255,0.5) !important;
-              border-color: #00e5ff !important;
-            }
-            body.theme-cyber #settings-popup {
-              border-color: rgba(43,51,198,0.6) !important;
-              box-shadow: 0 16px 48px rgba(0,229,255,0.12), 0 0 0 1px rgba(0,229,255,0.05) !important;
-            }
-            body.theme-cyber .sp-tab.active {
-              border-bottom-color: #00e5ff !important;
-              color: #00e5ff !important;
-            }
-            body.theme-cyber .sp-popup-title {
-              font-family: 'Orbitron', sans-serif !important;
-              letter-spacing: 0.1em;
-              color: #00e5ff !important;
-            }
-            body.theme-cyber .sp-section-label {
-              color: #00e5ff !important;
-              letter-spacing: 0.15em;
-            }
-            body.theme-cyber .sp-theme-dropdown {
-              border-color: rgba(43,51,198,0.5) !important;
-              font-family: 'Rajdhani', sans-serif !important;
-            }
-            body.theme-cyber .sp-theme-dropdown:hover {
-              border-color: #00e5ff !important;
-              box-shadow: 0 0 8px rgba(0,229,255,0.15) !important;
             }
             body.theme-cyber .hdr-title {
               font-family: 'Orbitron', sans-serif !important;
