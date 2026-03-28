@@ -994,49 +994,54 @@ body.theme-cyber .hdr-title,
       });
     }
 
-    function collectAlerts(r){
-      if(!r)return [];
+    function _daResolve(boat){
       var da=window._alertConfig&&window._alertConfig.dailyAlerts;
-      var tg=da&&da.toggles||{};
-      var th=da&&da.thresholds||{};
-      var on=function(k){return tg[k]!==false;};
-      var tv=function(k,side){var o=th[k];return o&&typeof o[side]==='number'?o[side]:null;};
+      if(!da)return{tg:{},th:{}};
+      var g=da.global||{};var gTog=g.toggles||{};var gThr=g.thresholds||{};
+      var b=(da.boats&&da.boats[boat])||{};var bTog=b.toggles||{};var bThr=b.thresholds||{};
+      return{
+        on:function(k){if(bTog.hasOwnProperty(k))return bTog[k]!==false;if(gTog.hasOwnProperty(k))return gTog[k]!==false;return true;},
+        tv:function(k,side){var bo=bThr[k];if(bo&&typeof bo[side]==='number')return bo[side];var go=gThr[k];if(go&&typeof go[side]==='number')return go[side];return null;}
+      };
+    }
+    function collectAlerts(r,boat){
+      if(!r)return [];
+      var cfg=_daResolve(boat||'');
       const a=[];
-      if(on('portOilLevel')&&r['Port Oil Level']&&r['Port Oil Level']!=='OK')a.push(`Port Oil ${r['Port Oil Level']}`);
-      var potThresh=tv('oilTemp','port');
+      if(cfg.on('portOilLevel')&&r['Port Oil Level']&&r['Port Oil Level']!=='OK')a.push(`Port Oil ${r['Port Oil Level']}`);
+      var potThresh=cfg.tv('oilTemp','port');
       if(potThresh!==null){if(parseFloat(r['Port Oil Temp C'])>=potThresh)a.push(`Port Oil Temp HIGH (${r['Port Oil Temp C']}°C)`);}
       else{if(r['Port Oil Temp Status']==='High')a.push(`Port Oil Temp HIGH (${r['Port Oil Temp C']}°C)`);}
-      if(on('portCoolantLevel')&&r['Port Coolant Level']&&r['Port Coolant Level']!=='OK')a.push(`Port Coolant ${r['Port Coolant Level']}`);
-      var pctThresh=tv('coolantTemp','port');
+      if(cfg.on('portCoolantLevel')&&r['Port Coolant Level']&&r['Port Coolant Level']!=='OK')a.push(`Port Coolant ${r['Port Coolant Level']}`);
+      var pctThresh=cfg.tv('coolantTemp','port');
       if(parseFloat(r['Port Coolant Temp C'])>=(pctThresh!==null?pctThresh:90))a.push(`Port Coolant Temp ${r['Port Coolant Temp C']}°C`);
-      if(on('portSmoke')&&r['Port Smoke']&&r['Port Smoke']!=='No Smoke')a.push(`Port Smoke: ${r['Port Smoke']}`);
-      if(on('portLOLeak')&&r['Port LO Leak']==='Yes')a.push('Port LO Leak');
-      if(on('portFOLeak')&&r['Port FO Leak']==='Yes')a.push('Port FO Leak');
-      if(on('portGearboxOil')&&r['Port Gearbox Oil']==='LOW')a.push('Port Gearbox Oil LOW');
-      if(on('stbdOilLevel')&&r['Stbd Oil Level']&&r['Stbd Oil Level']!=='OK')a.push(`Stbd Oil ${r['Stbd Oil Level']}`);
-      var sotThresh=tv('oilTemp','stbd');
+      if(cfg.on('portSmoke')&&r['Port Smoke']&&r['Port Smoke']!=='No Smoke')a.push(`Port Smoke: ${r['Port Smoke']}`);
+      if(cfg.on('portLOLeak')&&r['Port LO Leak']==='Yes')a.push('Port LO Leak');
+      if(cfg.on('portFOLeak')&&r['Port FO Leak']==='Yes')a.push('Port FO Leak');
+      if(cfg.on('portGearboxOil')&&r['Port Gearbox Oil']==='LOW')a.push('Port Gearbox Oil LOW');
+      if(cfg.on('stbdOilLevel')&&r['Stbd Oil Level']&&r['Stbd Oil Level']!=='OK')a.push(`Stbd Oil ${r['Stbd Oil Level']}`);
+      var sotThresh=cfg.tv('oilTemp','stbd');
       if(sotThresh!==null){if(parseFloat(r['Stbd Oil Temp C'])>=sotThresh)a.push(`Stbd Oil Temp HIGH (${r['Stbd Oil Temp C']}°C)`);}
       else{if(r['Stbd Oil Temp Status']==='High')a.push(`Stbd Oil Temp HIGH (${r['Stbd Oil Temp C']}°C)`);}
-      if(on('stbdCoolantLevel')&&r['Stbd Coolant Level']&&r['Stbd Coolant Level']!=='OK')a.push(`Stbd Coolant ${r['Stbd Coolant Level']}`);
-      var sctThresh=tv('coolantTemp','stbd');
+      if(cfg.on('stbdCoolantLevel')&&r['Stbd Coolant Level']&&r['Stbd Coolant Level']!=='OK')a.push(`Stbd Coolant ${r['Stbd Coolant Level']}`);
+      var sctThresh=cfg.tv('coolantTemp','stbd');
       if(parseFloat(r['Stbd Coolant Temp C'])>=(sctThresh!==null?sctThresh:90))a.push(`Stbd Coolant Temp ${r['Stbd Coolant Temp C']}°C`);
-      if(on('stbdSmoke')&&r['Stbd Smoke']&&r['Stbd Smoke']!=='No Smoke')a.push(`Stbd Smoke: ${r['Stbd Smoke']}`);
-      if(on('stbdLOLeak')&&r['Stbd LO Leak']==='Yes')a.push('Stbd LO Leak');
-      if(on('stbdFOLeak')&&r['Stbd FO Leak']==='Yes')a.push('Stbd FO Leak');
-      if(on('stbdGearboxOil')&&r['Stbd Gearbox Oil']==='LOW')a.push('Stbd Gearbox Oil LOW');
-      if(on('bilgeStatus')&&r['Bilge Status']==='Water')a.push('Bilge WATER');
-      if(on('bilgePump')&&r['Bilge Pump']==='Not Working')a.push('Bilge Pump DOWN');
+      if(cfg.on('stbdSmoke')&&r['Stbd Smoke']&&r['Stbd Smoke']!=='No Smoke')a.push(`Stbd Smoke: ${r['Stbd Smoke']}`);
+      if(cfg.on('stbdLOLeak')&&r['Stbd LO Leak']==='Yes')a.push('Stbd LO Leak');
+      if(cfg.on('stbdFOLeak')&&r['Stbd FO Leak']==='Yes')a.push('Stbd FO Leak');
+      if(cfg.on('stbdGearboxOil')&&r['Stbd Gearbox Oil']==='LOW')a.push('Stbd Gearbox Oil LOW');
+      if(cfg.on('bilgeStatus')&&r['Bilge Status']==='Water')a.push('Bilge WATER');
+      if(cfg.on('bilgePump')&&r['Bilge Pump']==='Not Working')a.push('Bilge Pump DOWN');
       return a;
     }
     function boatStatus(boat,dateStr){
       const row=rowsForBoatDate(boat,dateStr)[0];
       if(!row)return 'missing';
-      const alerts=collectAlerts(row);
+      const alerts=collectAlerts(row,boat);
       if(!alerts.length)return 'ok';
-      var da=window._alertConfig&&window._alertConfig.dailyAlerts;
-      var th=da&&da.thresholds||{};
-      var pct=th.coolantTemp&&typeof th.coolantTemp.port==='number'?th.coolantTemp.port:90;
-      var sct=th.coolantTemp&&typeof th.coolantTemp.stbd==='number'?th.coolantTemp.stbd:90;
+      var cfg=_daResolve(boat);
+      var pct=cfg.tv('coolantTemp','port');pct=pct!==null?pct:90;
+      var sct=cfg.tv('coolantTemp','stbd');sct=sct!==null?sct:90;
       const hasCH=parseFloat(row['Port Coolant Temp C'])>=pct||parseFloat(row['Stbd Coolant Temp C'])>=sct;
       const hasOL=(row['Port Oil Level']&&row['Port Oil Level']!=='OK')||(row['Stbd Oil Level']&&row['Stbd Oil Level']!=='OK');
       if(hasCH||(hasOL&&row['Bilge Status']==='Water'))return 'critical';
@@ -1351,7 +1356,7 @@ body.theme-cyber .hdr-title,
 
     function buildBoatCard(boat,status,row,today){
       const isMissing=status==='missing';
-      const alerts=row?collectAlerts(row):[];
+      const alerts=row?collectAlerts(row,boat):[];
       const time=row?toSGTTime(row['Submitted At']):'';
       const border=cardBorder(status);
       const opacity=isMissing?'opacity:0.6;':'';
@@ -1486,7 +1491,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     // ── MODAL ──
     function openModal(boat,dateStr){
       const row=rowsForBoatDate(boat,dateStr)[0]||null;if(!row)return;
-      const alerts=collectAlerts(row);const status=boatStatus(boat,dateStr);
+      const alerts=collectAlerts(row,boat);const status=boatStatus(boat,dateStr);
       const time=toSGTTime(row['Submitted At']);const dAgo=daysAgo(dateStr);const hasPics=dAgo<=7;
       const badgeBg=status==='critical'?'#1E0808':status==='alert'?'#1E1200':'#071E14';
       const badgeBorder=status==='critical'?'#7A2020':status==='alert'?'#7A5000':'#0D4A2A';

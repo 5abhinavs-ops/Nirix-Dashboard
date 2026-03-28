@@ -521,7 +521,9 @@
 
         <div class="panel" style="margin-top:18px">
           <h2>DAILY REPORTS ALERT PARAMETERS</h2>
-          <p style="font-size:11px;color:#5A7A9A;margin-bottom:12px">Toggle alerts on/off and set numeric thresholds. Alert fires when reading exceeds the set value.</p>
+
+          <h3 style="font-size:12px;color:#5AB8E8;margin:10px 0 8px;border-bottom:1px solid #1E3A5F;padding-bottom:6px">Part 1 — Global Defaults</h3>
+          <p style="font-size:11px;color:#5A7A9A;margin-bottom:10px">Baseline settings for every boat. Alert fires when reading exceeds the threshold.</p>
 
           <h3 style="font-size:11px;color:#8AA8C0;margin:10px 0 6px;text-transform:uppercase;letter-spacing:0.08em">On / Off Toggles</h3>
           <table style="width:100%;border-collapse:collapse;font-size:12px">
@@ -529,7 +531,7 @@
               <th style="text-align:left;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Parameter</th>
               <th style="text-align:center;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Enabled</th>
             </tr></thead>
-            <tbody id="da-toggles-tbody"></tbody>
+            <tbody id="da-g-toggles"></tbody>
           </table>
 
           <h3 style="font-size:11px;color:#8AA8C0;margin:16px 0 6px;text-transform:uppercase;letter-spacing:0.08em">Numeric Thresholds</h3>
@@ -539,13 +541,63 @@
               <th style="text-align:left;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Port Threshold</th>
               <th style="text-align:left;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Stbd Threshold</th>
             </tr></thead>
-            <tbody id="da-thresholds-tbody"></tbody>
+            <tbody id="da-g-thresholds"></tbody>
           </table>
 
           <div style="margin-top:12px">
-            <button type="button" class="btn" onclick="saveDailyAlerts()">Save Daily Alert Settings</button>
+            <button type="button" class="btn" onclick="saveDailyGlobal()">Save Global Defaults</button>
           </div>
-          <div id="ac-daily-msg" class="msg"></div>
+          <div id="ac-daily-global-msg" class="msg"></div>
+
+          <h3 style="font-size:12px;color:#5AB8E8;margin:22px 0 8px;border-bottom:1px solid #1E3A5F;padding-bottom:6px">Part 2 — Per-Boat Overrides</h3>
+          <p style="font-size:11px;color:#5A7A9A;margin-bottom:10px">Override any parameter for a specific boat. Global value shown as placeholder when no override exists.</p>
+
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <button type="button" class="btn da-co-tab active" data-co="Sea Cabbie" onclick="daSelectCompanyTab('Sea Cabbie')">Sea Cabbie</button>
+            <button type="button" class="btn da-co-tab" data-co="SG Shipping" onclick="daSelectCompanyTab('SG Shipping')" style="background:#1E3A5F">SG Shipping</button>
+          </div>
+          <div style="margin-bottom:10px">
+            <select id="da-boat-sel" onchange="daSelectBoat(this.value)" style="width:220px">
+              <option value="">— Select boat —</option>
+            </select>
+          </div>
+          <div id="da-boat-form" style="display:none">
+            <h3 style="font-size:11px;color:#8AA8C0;margin:10px 0 6px;text-transform:uppercase;letter-spacing:0.08em">On / Off Toggles</h3>
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr>
+                <th style="text-align:left;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Parameter</th>
+                <th style="text-align:center;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Override</th>
+              </tr></thead>
+              <tbody id="da-b-toggles"></tbody>
+            </table>
+
+            <h3 style="font-size:11px;color:#8AA8C0;margin:16px 0 6px;text-transform:uppercase;letter-spacing:0.08em">Numeric Thresholds</h3>
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr>
+                <th style="text-align:left;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Parameter</th>
+                <th style="text-align:left;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Port Override</th>
+                <th style="text-align:left;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Stbd Override</th>
+              </tr></thead>
+              <tbody id="da-b-thresholds"></tbody>
+            </table>
+
+            <div style="margin-top:12px">
+              <button type="button" class="btn" onclick="saveDailyBoat()">Save Boat Override</button>
+            </div>
+            <div id="ac-daily-boat-msg" class="msg"></div>
+          </div>
+
+          <h3 style="font-size:12px;color:#5AB8E8;margin:22px 0 8px;border-bottom:1px solid #1E3A5F;padding-bottom:6px">Part 3 — Override Log</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:11px">
+            <thead><tr>
+              <th style="text-align:left;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Boat</th>
+              <th style="text-align:left;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Company</th>
+              <th style="text-align:left;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Parameter</th>
+              <th style="text-align:left;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Value</th>
+              <th style="text-align:left;padding:6px 10px;color:#8AA8C0;border-bottom:1px solid #1E3A5F">Date &amp; Time</th>
+            </tr></thead>
+            <tbody id="da-override-log"></tbody>
+          </table>
         </div>
 
         <div class="panel" style="margin-top:18px">
@@ -1091,7 +1143,7 @@
       setTimeout(function () { el.textContent = ''; el.className = 'msg'; }, 4000);
     }
 
-    // ── DAILY ALERTS CONFIG ────────────────────────────────
+    // ── DAILY ALERTS CONFIG v4 ─────────────────────────────
     var DA_TOGGLES = [
       {key:'portOilLevel',    label:'Port Oil Level'},
       {key:'stbdOilLevel',    label:'Stbd Oil Level'},
@@ -1106,7 +1158,11 @@
       {key:'portGearboxOil',  label:'Port Gearbox Oil'},
       {key:'stbdGearboxOil',  label:'Stbd Gearbox Oil'},
       {key:'bilgeStatus',     label:'Bilge Status'},
-      {key:'bilgePump',       label:'Bilge Pump'}
+      {key:'bilgePump',       label:'Bilge Pump'},
+      {key:'portOilPressure', label:'Port Oil Pressure'},
+      {key:'stbdOilPressure', label:'Stbd Oil Pressure'},
+      {key:'portBattery',     label:'Port Battery'},
+      {key:'stbdBattery',     label:'Stbd Battery'}
     ];
     var DA_THRESHOLDS = [
       {key:'oilTemp',     label:'Engine Oil Temp (°C)',  defPort:null, defStbd:null},
@@ -1114,22 +1170,39 @@
       {key:'oilPressure', label:'Oil Pressure (bar)',    defPort:null, defStbd:null},
       {key:'batteryV',    label:'Battery Voltage (V)',   defPort:null, defStbd:null}
     ];
+    var DA_TOGGLE_LABELS = {};
+    DA_TOGGLES.forEach(function(t){ DA_TOGGLE_LABELS[t.key]=t.label; });
+    var DA_THRESH_LABELS = {};
+    DA_THRESHOLDS.forEach(function(t){ DA_THRESH_LABELS[t.key]=t.label; });
+    var _daSelectedCo = 'Sea Cabbie';
+    var _daSelectedBoat = '';
+    var _inputStyle = 'width:70px;background:#0A1628;border:1px solid #1E3A5F;border-radius:6px;color:#FFF;padding:5px 8px;font-family:inherit;font-size:12px';
 
-    function renderDailyAlertsUI() {
+    function _daGetGlobal() {
       var da = (_acData && _acData.dailyAlerts) || {};
-      var toggles = da.toggles || {};
-      var thresholds = da.thresholds || {};
-      var tb1 = document.getElementById('da-toggles-tbody');
+      return da.global || {};
+    }
+    function _daGetBoat(boatName) {
+      var da = (_acData && _acData.dailyAlerts) || {};
+      var boats = da.boats || {};
+      return boats[boatName] || {};
+    }
+
+    function renderGlobalUI() {
+      var g = _daGetGlobal();
+      var toggles = g.toggles || {};
+      var thresholds = g.thresholds || {};
+      var tb1 = document.getElementById('da-g-toggles');
       if (tb1) {
         var h = '';
         DA_TOGGLES.forEach(function (t) {
           var on = toggles[t.key] !== false;
           h += '<tr><td style="padding:6px 10px;color:#FFF">' + t.label + '</td>' +
-            '<td style="text-align:center;padding:6px 10px"><input type="checkbox" class="da-toggle" data-key="' + t.key + '"' + (on ? ' checked' : '') + ' /></td></tr>';
+            '<td style="text-align:center;padding:6px 10px"><input type="checkbox" class="da-g-tog" data-key="' + t.key + '"' + (on ? ' checked' : '') + ' /></td></tr>';
         });
         tb1.innerHTML = h;
       }
-      var tb2 = document.getElementById('da-thresholds-tbody');
+      var tb2 = document.getElementById('da-g-thresholds');
       if (tb2) {
         var h2 = '';
         DA_THRESHOLDS.forEach(function (t) {
@@ -1137,35 +1210,170 @@
           var pVal = typeof th.port === 'number' ? th.port : (t.defPort !== null ? t.defPort : '');
           var sVal = typeof th.stbd === 'number' ? th.stbd : (t.defStbd !== null ? t.defStbd : '');
           h2 += '<tr><td style="padding:6px 10px;color:#FFF">' + t.label + '</td>' +
-            '<td style="padding:6px 10px"><input type="number" class="da-thresh-port" data-key="' + t.key + '" value="' + pVal + '" style="width:70px;background:#0A1628;border:1px solid #1E3A5F;border-radius:6px;color:#FFF;padding:5px 8px;font-family:inherit;font-size:12px" /></td>' +
-            '<td style="padding:6px 10px"><input type="number" class="da-thresh-stbd" data-key="' + t.key + '" value="' + sVal + '" style="width:70px;background:#0A1628;border:1px solid #1E3A5F;border-radius:6px;color:#FFF;padding:5px 8px;font-family:inherit;font-size:12px" /></td></tr>';
+            '<td style="padding:6px 10px"><input type="number" class="da-g-tp" data-key="' + t.key + '" value="' + pVal + '" style="' + _inputStyle + '" /></td>' +
+            '<td style="padding:6px 10px"><input type="number" class="da-g-ts" data-key="' + t.key + '" value="' + sVal + '" style="' + _inputStyle + '" /></td></tr>';
         });
         tb2.innerHTML = h2;
       }
     }
 
-    async function saveDailyAlerts() {
+    async function saveDailyGlobal() {
       var toggles = {};
-      document.querySelectorAll('.da-toggle').forEach(function (cb) {
-        toggles[cb.dataset.key] = cb.checked;
-      });
+      document.querySelectorAll('.da-g-tog').forEach(function (cb) { toggles[cb.dataset.key] = cb.checked; });
       var thresholds = {};
       DA_THRESHOLDS.forEach(function (t) {
-        var pInp = document.querySelector('.da-thresh-port[data-key="' + t.key + '"]');
-        var sInp = document.querySelector('.da-thresh-stbd[data-key="' + t.key + '"]');
+        var p = document.querySelector('.da-g-tp[data-key="' + t.key + '"]');
+        var s = document.querySelector('.da-g-ts[data-key="' + t.key + '"]');
         var obj = {};
-        if (pInp && pInp.value !== '') obj.port = parseFloat(pInp.value);
-        if (sInp && sInp.value !== '') obj.stbd = parseFloat(sInp.value);
+        if (p && p.value !== '') obj.port = parseFloat(p.value);
+        if (s && s.value !== '') obj.stbd = parseFloat(s.value);
         if (obj.port !== undefined || obj.stbd !== undefined) thresholds[t.key] = obj;
       });
       try {
-        await ALERT_CFG_DOC().set({ dailyAlerts: { toggles: toggles, thresholds: thresholds } }, { merge: true });
+        var payload = { toggles: toggles, thresholds: thresholds, updatedAt: new Date().toISOString() };
+        await ALERT_CFG_DOC().set({ dailyAlerts: { global: payload } }, { merge: true });
         if (!_acData) _acData = {};
-        _acData.dailyAlerts = { toggles: toggles, thresholds: thresholds };
-        acMsg('ac-daily-msg', 'Daily alert settings saved.', true);
+        if (!_acData.dailyAlerts) _acData.dailyAlerts = {};
+        _acData.dailyAlerts.global = payload;
+        acMsg('ac-daily-global-msg', 'Global defaults saved.', true);
       } catch (e) {
-        acMsg('ac-daily-msg', 'Save failed: ' + e.message, false);
+        acMsg('ac-daily-global-msg', 'Save failed: ' + e.message, false);
       }
+    }
+
+    function daSelectCompanyTab(co) {
+      _daSelectedCo = co;
+      document.querySelectorAll('.da-co-tab').forEach(function (b) {
+        var active = b.dataset.co === co;
+        b.classList.toggle('active', active);
+        b.style.background = active ? '' : '#1E3A5F';
+      });
+      var sel = document.getElementById('da-boat-sel');
+      var boats = co === 'Sea Cabbie' ? SEA_CABBIE_BOATS : SG_SHIPPING_BOATS;
+      sel.innerHTML = '<option value="">— Select boat —</option>';
+      boats.forEach(function (b) {
+        sel.innerHTML += '<option value="' + b + '">' + b + '</option>';
+      });
+      _daSelectedBoat = '';
+      document.getElementById('da-boat-form').style.display = 'none';
+    }
+
+    function daSelectBoat(boatName) {
+      _daSelectedBoat = boatName;
+      if (!boatName) { document.getElementById('da-boat-form').style.display = 'none'; return; }
+      document.getElementById('da-boat-form').style.display = 'block';
+      renderBoatOverrideUI(boatName);
+    }
+
+    function renderBoatOverrideUI(boatName) {
+      var g = _daGetGlobal();
+      var gTog = g.toggles || {};
+      var gThr = g.thresholds || {};
+      var b = _daGetBoat(boatName);
+      var bTog = b.toggles || {};
+      var bThr = b.thresholds || {};
+
+      var tb1 = document.getElementById('da-b-toggles');
+      if (tb1) {
+        var h = '';
+        DA_TOGGLES.forEach(function (t) {
+          var gVal = gTog[t.key] !== false;
+          var hasOv = bTog.hasOwnProperty(t.key);
+          var val = hasOv ? bTog[t.key] : gVal;
+          var hint = hasOv ? '' : ' <span style="color:#5A7A9A;font-size:10px">(global: ' + (gVal ? 'on' : 'off') + ')</span>';
+          h += '<tr><td style="padding:6px 10px;color:#FFF">' + t.label + hint + '</td>' +
+            '<td style="text-align:center;padding:6px 10px"><input type="checkbox" class="da-b-tog" data-key="' + t.key + '"' + (val ? ' checked' : '') + ' /></td></tr>';
+        });
+        tb1.innerHTML = h;
+      }
+
+      var tb2 = document.getElementById('da-b-thresholds');
+      if (tb2) {
+        var h2 = '';
+        DA_THRESHOLDS.forEach(function (t) {
+          var gth = gThr[t.key] || {};
+          var bth = bThr[t.key] || {};
+          var pPh = typeof gth.port === 'number' ? gth.port : (t.defPort !== null ? t.defPort : '');
+          var sPh = typeof gth.stbd === 'number' ? gth.stbd : (t.defStbd !== null ? t.defStbd : '');
+          var pVal = typeof bth.port === 'number' ? bth.port : '';
+          var sVal = typeof bth.stbd === 'number' ? bth.stbd : '';
+          h2 += '<tr><td style="padding:6px 10px;color:#FFF">' + t.label + '</td>' +
+            '<td style="padding:6px 10px"><input type="number" class="da-b-tp" data-key="' + t.key + '" value="' + pVal + '" placeholder="' + pPh + '" style="' + _inputStyle + '" /></td>' +
+            '<td style="padding:6px 10px"><input type="number" class="da-b-ts" data-key="' + t.key + '" value="' + sVal + '" placeholder="' + sPh + '" style="' + _inputStyle + '" /></td></tr>';
+        });
+        tb2.innerHTML = h2;
+      }
+    }
+
+    async function saveDailyBoat() {
+      if (!_daSelectedBoat) return;
+      var boatName = _daSelectedBoat;
+      var toggles = {};
+      document.querySelectorAll('.da-b-tog').forEach(function (cb) { toggles[cb.dataset.key] = cb.checked; });
+      var thresholds = {};
+      DA_THRESHOLDS.forEach(function (t) {
+        var p = document.querySelector('.da-b-tp[data-key="' + t.key + '"]');
+        var s = document.querySelector('.da-b-ts[data-key="' + t.key + '"]');
+        var obj = {};
+        if (p && p.value !== '') obj.port = parseFloat(p.value);
+        if (s && s.value !== '') obj.stbd = parseFloat(s.value);
+        if (obj.port !== undefined || obj.stbd !== undefined) thresholds[t.key] = obj;
+      });
+      try {
+        var payload = { toggles: toggles, thresholds: thresholds, updatedAt: new Date().toISOString() };
+        var update = {};
+        update['dailyAlerts.boats.' + boatName] = payload;
+        await ALERT_CFG_DOC().set(update, { merge: true });
+        if (!_acData) _acData = {};
+        if (!_acData.dailyAlerts) _acData.dailyAlerts = {};
+        if (!_acData.dailyAlerts.boats) _acData.dailyAlerts.boats = {};
+        _acData.dailyAlerts.boats[boatName] = payload;
+        renderOverrideLog();
+        acMsg('ac-daily-boat-msg', boatName + ' overrides saved.', true);
+      } catch (e) {
+        acMsg('ac-daily-boat-msg', 'Save failed: ' + e.message, false);
+      }
+    }
+
+    function _boatCompany(boatName) {
+      return SEA_CABBIE_BOATS.indexOf(boatName) !== -1 ? 'Sea Cabbie' : 'SG Shipping';
+    }
+
+    function renderOverrideLog() {
+      var log = document.getElementById('da-override-log');
+      if (!log) return;
+      var da = (_acData && _acData.dailyAlerts) || {};
+      var boats = da.boats || {};
+      var rows = [];
+      Object.keys(boats).forEach(function (boatName) {
+        var bd = boats[boatName];
+        var co = _boatCompany(boatName);
+        var ts = bd.updatedAt || '';
+        var tFmt = ts ? new Date(ts).toLocaleString() : '—';
+        var bTog = bd.toggles || {};
+        Object.keys(bTog).forEach(function (k) {
+          rows.push({ boat: boatName, co: co, param: DA_TOGGLE_LABELS[k] || k, val: bTog[k] ? 'ON' : 'OFF', ts: tFmt });
+        });
+        var bThr = bd.thresholds || {};
+        Object.keys(bThr).forEach(function (k) {
+          var o = bThr[k];
+          if (typeof o.port === 'number') rows.push({ boat: boatName, co: co, param: (DA_THRESH_LABELS[k] || k) + ' (Port)', val: o.port, ts: tFmt });
+          if (typeof o.stbd === 'number') rows.push({ boat: boatName, co: co, param: (DA_THRESH_LABELS[k] || k) + ' (Stbd)', val: o.stbd, ts: tFmt });
+        });
+      });
+      if (!rows.length) {
+        log.innerHTML = '<tr><td colspan="5" style="padding:12px 10px;color:#5A7A9A;font-style:italic">No individual overrides set.</td></tr>';
+        return;
+      }
+      var h = '';
+      rows.forEach(function (r) {
+        h += '<tr><td style="padding:5px 10px;color:#FFF">' + esc(r.boat) + '</td>' +
+          '<td style="padding:5px 10px;color:#8AA8C0">' + esc(r.co) + '</td>' +
+          '<td style="padding:5px 10px;color:#C0D0E0">' + esc(r.param) + '</td>' +
+          '<td style="padding:5px 10px;color:#FFF">' + esc(String(r.val)) + '</td>' +
+          '<td style="padding:5px 10px;color:#5A7A9A">' + esc(r.ts) + '</td></tr>';
+      });
+      log.innerHTML = h;
     }
 
     // ── CERT TYPES CONFIG ────────────────────────────────────
@@ -1264,7 +1472,9 @@
       if (b2El) b2El.value = typeof bands.band2Days === 'number' ? bands.band2Days : 30;
       if (b3El) b3El.value = typeof bands.band3Days === 'number' ? bands.band3Days : 90;
 
-      renderDailyAlertsUI();
+      renderGlobalUI();
+      daSelectCompanyTab('Sea Cabbie');
+      renderOverrideLog();
       renderCertTypesUI();
     }
 
