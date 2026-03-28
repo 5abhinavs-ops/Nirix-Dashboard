@@ -919,12 +919,19 @@ body.theme-cyber .hdr-title,
     let _inactivityMins   = 30;
 
     async function loadSessionSettings() {
+      if (!_fbDb) { window._alertConfig = {}; return; }
       try {
         const snap = await _fbDb.collection('settings').doc('session').get();
         if (snap.exists && snap.data().inactivityTimeoutMins) {
           _inactivityMins = parseInt(snap.data().inactivityTimeoutMins, 10) || 30;
         }
       } catch (e) { /* use default */ }
+      try {
+        const acSnap = await _fbDb.collection('settings').doc('alertConfig').get();
+        window._alertConfig = acSnap.exists ? acSnap.data() : {};
+      } catch (e) {
+        window._alertConfig = {};
+      }
     }
 
     function resetInactivityTimer() {
@@ -1077,6 +1084,18 @@ body.theme-cyber .hdr-title,
 
     let _runhrsEditsLatest = {};
 
+    function getRunHrThreshold(boatName) {
+      var cfg = window._alertConfig && window._alertConfig.engineRunHrs;
+      if (!cfg) return null;
+      var ov = cfg.boatOverrides && cfg.boatOverrides[boatName];
+      if (ov && ov.disabled === true) return null;
+      if (ov && typeof ov.threshold === 'number') return ov.threshold;
+      var isSC = (SEA_CABBIE || []).indexOf(boatName) !== -1;
+      var co = isSC ? 'Sea Cabbie' : 'SG Shipping';
+      var def = cfg.companyDefaults && cfg.companyDefaults[co];
+      return typeof def === 'number' ? def : null;
+    }
+
     function rhEditKey(boat, sidePortStbd, month, year) {
       const s = sidePortStbd === 'Port' ? 'port' : 'stbd';
       return boat + '|' + s + '|' + month + '|' + year;
@@ -1130,7 +1149,8 @@ body.theme-cyber .hdr-title,
     function rhFleetCellTd(boat, side, month, year, v, isLatest, rowBg, padding) {
       const display = v !== null ? Math.round(v).toLocaleString('en-SG') : '—';
       const bg = isLatest ? '#0D2234' : rowBg;
-      const color = v !== null ? (side === 'Port' ? '#FFFFFF' : '#7ACFAA') : '#3A4A60';
+      const _thrsh = v !== null ? getRunHrThreshold(boat) : null;
+      const color = v !== null ? (_thrsh !== null && v > _thrsh ? '#E0A050' : (side === 'Port' ? '#FFFFFF' : '#7ACFAA')) : '#3A4A60';
       const fs = side === 'Port' ? '13px' : '12px';
       const fw = side === 'Port' ? '600' : '500';
       const baseStyle = 'text-align:center;padding:' + padding + ';border-left:1px solid #1A2F4A;border-top:none;border-bottom:none;background:' + bg + ';font-size:' + fs + ';font-weight:' + fw + ';color:' + color + ';white-space:nowrap';
@@ -1681,7 +1701,8 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
           const v2=v;
           const disp=v2!==null?Math.round(v2).toLocaleString('en-SG'):'—';
           const bg=isLatest?'#0D2234':rowBg;
-          const color=v2!==null?'#7ACFAA':'#3A4A60';
+          const _thrshS=v2!==null?getRunHrThreshold(boat):null;
+          const color=v2!==null?(_thrshS!==null&&v2>_thrshS?'#E0A050':'#7ACFAA'):'#3A4A60';
           const k=rhEditKey(boat,'Stbd',mo.month,mo.year);
           const meta=_runhrsEditsLatest[k];
           const u=getCurrentUser();
@@ -2209,12 +2230,16 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     }
 
     // ── OV_BANDS ────────────────────────────────────────────
+    const _cb = (window._alertConfig && window._alertConfig.certBands) || {};
+    const _b1 = typeof _cb.band1Days === 'number' ? _cb.band1Days : 10;
+    const _b2 = typeof _cb.band2Days === 'number' ? _cb.band2Days : 30;
+    const _b3 = typeof _cb.band3Days === 'number' ? _cb.band3Days : 90;
     const OV_BANDS=[
-      {id:'exp', label:'Expired',     color:'#BF00FF', bg:'#0E1A28', border:'#5A1010', fn:d=>d<0},
-      {id:'d10', label:'< 10 days',   color:'#950606', bg:'#0E1A28', border:'#1E3248', fn:d=>d>=0&&d<10},
-      {id:'d30', label:'< 30 days',   color:'#993D00', bg:'#0E1A28', border:'#1E3248', fn:d=>d>=10&&d<30},
-      {id:'d90', label:'30 – 90 days',color:'#D1FF19', bg:'#0E1A28', border:'#1E3248', fn:d=>d>=30&&d<90},
-      {id:'ok',  label:'Valid',       color:'#2AAA6A', bg:'#071E10', border:'#0A4020', fn:d=>d>=90},
+      {id:'exp', label:'Expired',           color:'#BF00FF', bg:'#0E1A28', border:'#5A1010', fn:d=>d<0},
+      {id:'d10', label:'< '+_b1+' days',    color:'#950606', bg:'#0E1A28', border:'#1E3248', fn:d=>d>=0&&d<_b1},
+      {id:'d30', label:'< '+_b2+' days',    color:'#993D00', bg:'#0E1A28', border:'#1E3248', fn:d=>d>=_b1&&d<_b2},
+      {id:'d90', label:_b2+' – '+_b3+' days',color:'#D1FF19', bg:'#0E1A28', border:'#1E3248', fn:d=>d>=_b2&&d<_b3},
+      {id:'ok',  label:'Valid',             color:'#2AAA6A', bg:'#071E10', border:'#0A4020', fn:d=>d>=_b3},
     ];
     // all boats in display order
     const ALL_BOATS=Object.keys(CERT_DATA);
