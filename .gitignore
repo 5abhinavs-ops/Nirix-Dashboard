@@ -1,0 +1,13 @@
+# Credentials and secrets — never commit these
+Key List.md
+admin.html
+*.json
+service-account.json
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
