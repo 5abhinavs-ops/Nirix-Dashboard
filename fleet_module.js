@@ -548,7 +548,7 @@ function buildDD(){
  if(picker){
  picker.innerHTML=MO.map(m=>{
  const _p=m.split('_'); const lbl=_p[0].slice(0,3)+(_p[1]||'').slice(2);
- return `<div onclick="onMonthChange('${m}')" style="padding:7px 14px;font-size:12px;cursor:pointer;color:${m===mk?'#5bc4a8':'#c5cde8'};font-weight:${m===mk?'700':'400'};white-space:nowrap" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background=''"> ${lbl}</div>`;
+ return `<div onclick="onMonthChange('${m}')" style="padding:7px 14px;font-size:14px;cursor:pointer;color:${m===mk?'#5bc4a8':'#c5cde8'};font-weight:${m===mk?'700':'400'};white-space:nowrap" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background=''"> ${lbl}</div>`;
  }).join('');
  }
 }
@@ -703,7 +703,7 @@ function renderAnalytics(){
  <div class="an-section">
  <div class="an-section-title">Monthly Availability Trend</div>
  <div class="an-card">
- <div class="an-card-title"><span style="display:inline-block;background:rgba(91,196,168,.15);border:1px solid rgba(91,196,168,.35);color:#ffffff;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:.03em">Monthly Trend</span></div>
+ <div class="an-card-title"><span style="display:inline-block;background:rgba(91,196,168,.15);border:1px solid rgba(91,196,168,.35);color:#ffffff;border-radius:20px;padding:3px 12px;font-size:13px;font-weight:700;letter-spacing:.03em">Monthly Trend</span></div>
  <div class="an-chart-wrap" style="height:220px">
  <canvas id="an-trend-chart"></canvas>
  </div>
@@ -715,11 +715,11 @@ function renderAnalytics(){
  <div class="an-month-tabs" id="an-month-tabs"></div>
  <div class="an-grid">
  <div class="an-card">
- <div class="an-card-title"><span style="display:inline-block;background:rgba(91,196,168,.15);border:1px solid rgba(91,196,168,.35);color:#ffffff;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700">Availability per Boat</span> <span style="display:inline-block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#c5cde8;border-radius:20px;padding:3px 10px;font-size:11px" id="an-sel-month-lbl">${selML}</span></div>
+ <div class="an-card-title"><span style="display:inline-block;background:rgba(91,196,168,.15);border:1px solid rgba(91,196,168,.35);color:#ffffff;border-radius:20px;padding:3px 12px;font-size:13px;font-weight:700">Availability per Boat</span> <span style="display:inline-block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#c5cde8;border-radius:20px;padding:3px 10px;font-size:13px" id="an-sel-month-lbl">${selML}</span></div>
  <div id="an-boat-bars"></div>
  </div>
  <div class="an-card">
- <div class="an-card-title"><span style="display:inline-block;background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.3);color:#ffffff;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700">Downtime Breakdown</span> <span style="display:inline-block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#8892b8;border-radius:20px;padding:3px 10px;font-size:11px">All Months</span></div>
+ <div class="an-card-title"><span style="display:inline-block;background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.3);color:#ffffff;border-radius:20px;padding:3px 12px;font-size:13px;font-weight:700">Downtime Breakdown</span> <span style="display:inline-block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#8892b8;border-radius:20px;padding:3px 10px;font-size:13px">All Months</span></div>
  <div class="an-chart-wrap" style="height:240px">
  <canvas id="an-pie-chart"></canvas>
  </div>
@@ -807,7 +807,7 @@ function renderBoatBars(md, isScb){
  {c:'#4472C4',l:'Structural Damage'},{c:'#FF66FF',l:'Propeller Damage'},{c:'#ED7D31',l:'Payment Delays'},
  ];
  const legend=legendItems.map(function(x){
- return '<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6a7498">'+
+ return '<div style="display:flex;align-items:center;gap:5px;font-size:13px;color:#6a7498">'+
  '<div style="width:9px;height:9px;border-radius:2px;background:'+x.c+'"></div>'+x.l+'</div>';
  }).join('');
  el.innerHTML=

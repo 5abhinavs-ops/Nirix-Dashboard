@@ -7,19 +7,20 @@
   <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 /* NIRIX TYPOGRAPHY SCALE
-   T1 Module titles    16px 700
-   T2 Boat names       15px 700
-   T3 Section headings 13px 700
-   T4 Body values      13px 500
-   T5 Field labels     12px 400
-   T6 Micro labels     11px 600 */
+   T1 Module titles    20px 700
+   T2 Boat names       17px 700
+   T3 Section headings 15px 700
+   T4 Body values      14px 500
+   T5 Field labels     13px 400
+   T6 Micro labels     13px 600
+   MIN Nothing below 13px */
 :root {
-  --fs-t1: 16px;   /* Module titles */
-  --fs-t2: 15px;   /* Boat names, section titles */
-  --fs-t3: 13px;   /* Section headings (Dimensions, Engine, Registration…) */
-  --fs-t4: 13px;   /* Body values, table data */
-  --fs-t5: 12px;   /* Field labels, muted descriptors */
-  --fs-t6: 11px;   /* Micro labels, badges, uppercase tags — absolute minimum */
+  --fs-t1: 20px;   /* Module titles */
+  --fs-t2: 17px;   /* Boat names, section titles */
+  --fs-t3: 15px;   /* Section headings */
+  --fs-t4: 14px;   /* Body values, table data */
+  --fs-t5: 13px;   /* Field labels, muted descriptors */
+  --fs-t6: 13px;   /* Micro labels, badges, uppercase tags — absolute minimum */
   --fw-heading: 700;
   --fw-value: 500;
   --fw-label: 400;
@@ -90,11 +91,11 @@ button { font-family: inherit; cursor: pointer; }
 .rh-star { position:absolute; top:1px; right:2px; font-size:var(--fs-t6); color:#E0A050; cursor:pointer; z-index:2; line-height:1; }
 .rh-pencil { font-size:var(--fs-t6); color:#5AB8E8; cursor:pointer; margin-left:4px; opacity:0; transition:opacity 0.15s; flex-shrink:0; }
 .rh-cell-wrap:hover .rh-pencil { opacity:1; }
-.cert-del-btn { font-size:14px;cursor:pointer;opacity:0.35;transition:opacity 0.15s;flex-shrink:0;padding:2px 4px;border-radius:4px; }
+.cert-del-btn { font-size:16px;cursor:pointer;opacity:0.35;transition:opacity 0.15s;flex-shrink:0;padding:2px 4px;border-radius:4px; }
 .cert-del-btn:hover { opacity:1;background:rgba(200,40,40,0.15); }
 .cert-add-btn { display:flex;align-items:center;gap:7px;margin-top:10px;padding:9px 16px;background:transparent;border:1px dashed #2A5A7A;border-radius:8px;color:#5AB8E8;font-size:var(--fs-t6);font-weight:600;cursor:pointer;letter-spacing:0.06em;transition:all 0.15s;width:fit-content; }
 .cert-add-btn:hover { background:rgba(58,143,191,0.09);border-color:#3A8FBF; }
-select { background:#0D1F3C;border:1px solid #1E3A5F;border-radius:6px;color:#FFFFFF;font-size:13px;font-weight:600;padding:6px 10px;cursor:pointer;outline:none;font-family:inherit; }
+select { background:#0D1F3C;border:1px solid #1E3A5F;border-radius:6px;color:#FFFFFF;font-size:15px;font-weight:600;padding:6px 10px;cursor:pointer;outline:none;font-family:inherit; }
 select:hover { border-color:#0D8A9A; }
 select option { background:#0D1F3C;color:#FFFFFF; }
 ::-webkit-scrollbar { width:5px;height:5px; }
@@ -623,7 +624,7 @@ select option { background:#0D1F3C;color:#FFFFFF; }
       const year = parseInt(cell.getAttribute('data-year'), 10);
       const curText = (cell.textContent || '').replace(/,/g, '').trim();
       const curVal = curText === '—' ? '' : curText;
-      wrap.innerHTML = '<input type="number" class="rh-inline-inp" step="0.1" style="width:72px;padding:4px 6px;background:#0D1F3C;border:1px solid #1E3A5F;border-radius:4px;color:#FFF;font-size:12px" value="' + rhEscAttr(curVal) + '"/>' +
+      wrap.innerHTML = '<input type="number" class="rh-inline-inp" step="0.1" style="width:72px;padding:4px 6px;background:#0D1F3C;border:1px solid #1E3A5F;border-radius:4px;color:#FFF;font-size:14px" value="' + rhEscAttr(curVal) + '"/>' +
         ' <span onclick="rhConfirmEdit(this)" style="cursor:pointer;color:#FFFFFF;font-weight:700">✓</span>' +
         ' <span onclick="rhCancelEdit(this)" style="cursor:pointer;color:#E05A5A;margin-left:4px">×</span>' +
         '<input type="hidden" class="rh-h-boat" value="' + rhEscAttr(boat) + '"/><input type="hidden" class="rh-h-side" value="' + side + '"/><input type="hidden" class="rh-h-month" value="' + month + '"/><input type="hidden" class="rh-h-year" value="' + year + '"/>';
@@ -718,7 +719,7 @@ select option { background:#0D1F3C;color:#FFFFFF; }
     function renderDaily(){
       const today=todaySGT();
       document.getElementById('v-daily').innerHTML=
-        `<div style="font-size:12px;color:#8AA8C0;margin-bottom:14px"><strong style="font-size:13px;color:#FFFFFF;font-weight:500">Today</strong> &nbsp;—&nbsp;${fmtDateLong(today)}</div>
+        `<div style="font-size:14px;color:#8AA8C0;margin-bottom:14px"><strong style="font-size:15px;color:#FFFFFF;font-weight:500">Today</strong> &nbsp;—&nbsp;${fmtDateLong(today)}</div>
         <div style="display:flex;gap:0">
           <div style="flex:1;padding-right:18px;margin-right:18px;border-right:1px solid #1E3A5F">${buildColumn('Sea Cabbie',SEA_CABBIE,today)}</div>
           <div style="flex:1">${buildColumn('SG Shipping',SG_SHIPPING,today)}</div>
@@ -732,7 +733,7 @@ select option { background:#0D1F3C;color:#FFFFFF; }
       const isSea=company==='Sea Cabbie';
       const companyTab=`<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;border:1px solid ${isSea?'#1A3A5A':'#1E2E4A'};background:${isSea?'#071828':'#0D1A2E'};margin-bottom:10px">
         ${isSea?seaCabbieLogoHTML():sgShippingLogoHTML()}
-        <div><div style="font-size:11px;font-weight:700;color:#FFFFFF;letter-spacing:0.06em;text-transform:uppercase">${company}</div><div style="font-size:var(--fs-t6);color:#8AA8C0;margin-top:1px">12 vessels</div></div></div>`;
+        <div><div style="font-size:13px;font-weight:700;color:#FFFFFF;letter-spacing:0.06em;text-transform:uppercase">${company}</div><div style="font-size:var(--fs-t6);color:#8AA8C0;margin-top:1px">12 vessels</div></div></div>`;
       const counts=`<div style="display:flex;gap:5px;margin-bottom:12px">${countBox(ok,'Submitted<br>OK','#071E14','#0D4A2A')}${countBox(al,'Alert','#1E1200','#6A4A00')}${countBox(cr,'Critical','#1E0808','#6A2020')}${countBox(ms,'Not<br>submitted','#0A1220','#1A2A3A')}</div>`;
       const groups=[{key:'critical',label:'Critical alert',dot:'#C84040'},{key:'alert',label:'Alert',dot:'#D4920A'},{key:'ok',label:'Submitted',dot:'#1A9A6A'},{key:'missing',label:'Not submitted',dot:'#3A4A60'}];
       let grpHTML='';
@@ -754,7 +755,7 @@ select option { background:#0D1F3C;color:#FFFFFF; }
         bg==='#1E1200' ? 'scifi-count-alert' :
         bg==='#1E0808' ? 'scifi-count-critical' : 'scifi-count-missing';
       return `<div class="${scifiClass}" style="flex:1;background:${bg};border:1px solid ${border};border-radius:5px;padding:5px 3px;display:flex;flex-direction:column;align-items:center">
-        <div style="font-size:14px;font-weight:700;color:#FFFFFF;line-height:1">${n}</div>
+        <div style="font-size:16px;font-weight:700;color:#FFFFFF;line-height:1">${n}</div>
         <div style="font-size:var(--fs-t6);color:#8AA8C0;margin-top:2px;text-align:center;line-height:1.2">${label}</div></div>`;
     }
 
@@ -775,7 +776,7 @@ select option { background:#0D1F3C;color:#FFFFFF; }
       const pills=alerts.length>0?`<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px">${alerts.slice(0,3).map(a=>`<span style="font-size:var(--fs-t6);padding:1px 5px;border-radius:3px;color:#FFFFFF;background:${status==='critical'?'#3A0A0A':'#3A2800'}">${a}</span>`).join('')}</div>`:'';
       const extraClass=`theme-boat-card status-${status}`;
       return `<div ${hoverOn} ${hoverOff} ${click} class="${extraClass}" style="${cursor}${opacity}display:flex;flex-direction:column;padding:7px 10px;border-radius:6px;margin-bottom:4px;background:#0D1F3C;border:1px solid ${border}">
-        <div style="display:flex;align-items:center;gap:6px"><span class="scifi-boat-name" style="font-size:13px;color:#FFFFFF;flex:1">${boat}</span>${time?`<span style="font-size:var(--fs-t6);color:#8AA8C0">${time}</span>`:''}</div>${pills}</div>`;
+        <div style="display:flex;align-items:center;gap:6px"><span class="scifi-boat-name" style="font-size:15px;color:#FFFFFF;flex:1">${boat}</span>${time?`<span style="font-size:var(--fs-t6);color:#8AA8C0">${time}</span>`:''}</div>${pills}</div>`;
     }
 
     function renderMonthly(){renderRail();renderGrid();}
@@ -808,24 +809,24 @@ select option { background:#0D1F3C;color:#FFFFFF; }
       const monthRows=rowsForBoatMonth(selectedBoat,currentMonth,currentYear);
       const dayMap={};
       monthRows.forEach(r=>{const ds=r['Submitted At']?toSGTDate(r['Submitted At']):(r['Date']||'').slice(0,10);const d=parseInt(ds.slice(8));if(!dayMap[d])dayMap[d]=r;});
-      let thHTML=`<th style="text-align:left;min-width:160px;background:#0D1F3C;color:#FFFFFF;font-size:11px;font-weight:500;padding:5px 10px;border:1px solid #1E3A5F"></th>`;
+      let thHTML=`<th style="text-align:left;min-width:160px;background:#0D1F3C;color:#FFFFFF;font-size:13px;font-weight:500;padding:5px 10px;border:1px solid #1E3A5F"></th>`;
       for(let d=1;d<=dim;d++){
         const isToday=isThisMo&&d===todayD;const isFuture=isThisMo&&d>todayD;
-        thHTML+=`<th style="text-align:center;min-width:38px;padding:5px 6px;border:1px solid #1E3A5F;font-size:11px;font-weight:500;background:${isToday?'#0D2A3A':'#0D1F3C'};color:${isFuture?'#3A4A60':'#FFFFFF'}">${d}</th>`;
+        thHTML+=`<th style="text-align:center;min-width:38px;padding:5px 6px;border:1px solid #1E3A5F;font-size:13px;font-weight:500;background:${isToday?'#0D2A3A':'#0D1F3C'};color:${isFuture?'#3A4A60':'#FFFFFF'}">${d}</th>`;
       }
       let tbHTML='';
       PARAMS.forEach(param=>{
         const sheetKey=PARAM_KEY[param];
-        let rowHTML=`<td style="text-align:left;background:#0D1F3C;color:#FFFFFF;cursor:default;border:1px solid #1A2F4A;padding:5px 10px;font-size:12px">${param}</td>`;
+        let rowHTML=`<td style="text-align:left;background:#0D1F3C;color:#FFFFFF;cursor:default;border:1px solid #1A2F4A;padding:5px 10px;font-size:14px">${param}</td>`;
         for(let d=1;d<=dim;d++){
           const isFuture=isThisMo&&d>todayD;const isToday=isThisMo&&d===todayD;
           const row=dayMap[d]||null;const bgBase=isToday?'#0D2A3A':'#0A1628';
-          if(isFuture||!row){rowHTML+=`<td style="text-align:center;background:${bgBase};color:#3A4A60;border:1px solid #1A2F4A;padding:4px 6px;font-size:11px;cursor:default">—</td>`;continue;}
+          if(isFuture||!row){rowHTML+=`<td style="text-align:center;background:${bgBase};color:#3A4A60;border:1px solid #1A2F4A;padding:4px 6px;font-size:13px;cursor:default">—</td>`;continue;}
           const val=row[sheetKey]||'—';
           const dateDs=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
           const cell=formatGridCell(param,val,row);
           rowHTML+=`<td onclick="openModal('${selectedBoat}','${dateDs}')" onmouseover="this.style.background='#0D1F3C'" onmouseout="this.style.background='${bgBase}'"
-            style="text-align:center;background:${bgBase};border:1px solid #1A2F4A;padding:4px 6px;font-size:11px;cursor:pointer">${cell}</td>`;
+            style="text-align:center;background:${bgBase};border:1px solid #1A2F4A;padding:4px 6px;font-size:13px;cursor:pointer">${cell}</td>`;
         }
         tbHTML+=`<tr>${rowHTML}</tr>`;
       });
@@ -860,9 +861,9 @@ select option { background:#0D1F3C;color:#FFFFFF; }
       w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report — ${boat}</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#111;padding:32px 36px;font-size:12px}
-h1{font-size:18px;font-weight:700;color:#0A1628;margin-bottom:4px}
-.sub{font-size:11px;color:#5A7A9A;margin-bottom:8px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#111;padding:32px 36px;font-size:14px}
+h1{font-size:22px;font-weight:700;color:#0A1628;margin-bottom:4px}
+.sub{font-size:13px;color:#5A7A9A;margin-bottom:8px}
 .badge{display:inline-block;padding:3px 10px;border-radius:5px;font-size:var(--fs-t6);font-weight:600;margin-bottom:18px}
 .sec-head{font-size:var(--fs-t3);font-weight:700;color:#5A7A9A;letter-spacing:0.1em;text-transform:uppercase;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid #D0DDE8}
 .row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #EEF2F6}
@@ -873,7 +874,7 @@ h1{font-size:18px;font-weight:700;color:#0A1628;margin-bottom:4px}
 .photo-item{display:flex;flex-direction:column;gap:4px}
 .photo-item .lbl{font-size:var(--fs-t6);font-weight:600;color:#5A7A9A;text-transform:uppercase;letter-spacing:0.06em}
 .photo-item img{width:100%;height:120px;object-fit:cover;border-radius:6px;border:1px solid #D0DDE8}
-.photo-item .val{font-size:11px;font-weight:700;text-align:center;color:#0A1628}
+.photo-item .val{font-size:13px;font-weight:700;text-align:center;color:#0A1628}
 .photo-item .val.alert{color:#C84040}
 .no-photo{height:120px;background:#f5f7fa;border-radius:6px;border:1px solid #D0DDE8;display:flex;align-items:center;justify-content:center;font-size:var(--fs-t6);color:#9AB0C0}
 @media print{
@@ -986,7 +987,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
                   onclick="window.open('${p.url}','_blank')" />
                 <div style="display:none;height:105px;background:#0A1628;border-radius:6px;border:0.5px solid #1E3A5F;align-items:center;justify-content:center;font-size:var(--fs-t6);color:#3A4A60">Photo unavailable</div>
-                ${dispVal?`<div style="font-size:11px;font-weight:700;color:${valColor};text-align:center;margin-top:1px">${dispVal}</div>`:''}
+                ${dispVal?`<div style="font-size:13px;font-weight:700;color:${valColor};text-align:center;margin-top:1px">${dispVal}</div>`:''}
               </div>`;
             });
             body+=`</div>`;
@@ -998,14 +999,14 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       document.getElementById('modal-boat').textContent=boat;
       document.getElementById('modal-date').textContent=`${dateLabel} · Submitted ${time}`;
       document.getElementById('modal-badge').textContent=badgeText;
-      document.getElementById('modal-badge').style.cssText=`background:${badgeBg};border:0.5px solid ${badgeBorder};color:#FFFFFF;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:500;display:inline-block;margin-top:5px`;
+      document.getElementById('modal-badge').style.cssText=`background:${badgeBg};border:0.5px solid ${badgeBorder};color:#FFFFFF;padding:3px 8px;border-radius:5px;font-size:13px;font-weight:500;display:inline-block;margin-top:5px`;
       document.getElementById('modal-body').innerHTML=body;
       document.getElementById('modalOverlay').style.display='flex';
     }
     function sHead(text,first){return `<div style="font-size:var(--fs-t3);font-weight:700;color:var(--color-heading);letter-spacing:0.08em;text-transform:uppercase;margin:${first?'0':'14px 0 8px'};padding-top:${first?'0':'12px'};padding-bottom:5px;border-top:${first?'none':'0.5px solid #1A2F4A'};border-bottom:0.5px solid rgba(91,196,168,0.25)">${text}</div>`;}
     function pRow(key,val,colour,isCritical){
       const c=isCritical?'#C84040':(colour?colour:'#FFFFFF');const w=colour||isCritical?'500':'400';
-      return `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid #0D1628"><span style="font-size:11px;color:#8AA8C0">${key}</span><span style="font-size:12px;color:${c};font-weight:${w}">${val}</span></div>`;
+      return `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid #0D1628"><span style="font-size:13px;color:#8AA8C0">${key}</span><span style="font-size:14px;color:${c};font-weight:${w}">${val}</span></div>`;
     }
     function closeModal(){document.getElementById('modalOverlay').style.display='none';}
     // downloadPDF is defined above
@@ -1051,7 +1052,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       </div>`;
 
       html+=`<div style="overflow-x:auto">`;
-      html+=`<table style="border-collapse:collapse;font-size:12px;width:100%;min-width:${110+months.length*90}px">`;
+      html+=`<table style="border-collapse:collapse;font-size:14px;width:100%;min-width:${110+months.length*90}px">`;
 
       // ── Header row (once at top) ──
       html+=`<thead><tr>`;
@@ -1083,7 +1084,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         html+=`<tr>`;
         html+=`<td style="position:sticky;left:0;z-index:1;padding:10px 12px;border-right:1px solid #1E3A5F;border-top:2px solid #1A3A5F;border-bottom:none;background:#0A1628">
           <div style="display:inline-flex;align-items:center;padding:5px 14px;background:#0D2040;border:1.5px solid #1E4A7A;border-radius:6px;box-shadow:0 0 8px rgba(13,100,160,0.25)">
-            <span style="font-size:14px;font-weight:700;color:#FFFFFF;letter-spacing:0.04em;white-space:nowrap">${boat}</span>
+            <span style="font-size:16px;font-weight:700;color:#FFFFFF;letter-spacing:0.04em;white-space:nowrap">${boat}</span>
           </div>
         </td>`;
         // Empty cells across month columns
@@ -1136,7 +1137,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
           const canE=typeof can!=='undefined'&&can.editRunHrs&&can.editRunHrs();
           const pencilHtml=canE?'<span class="rh-pencil" onclick="rhPencilClick(event,this)">✎</span>':'';
           const cellInner='<span class="rh-cell" data-boat="'+escBoat+'" data-side="stbd" data-month="'+mo.month+'" data-year="'+mo.year+'">'+disp+'</span>';
-          const baseStyle='text-align:center;padding:'+pad+';border-left:1px solid #1A2F4A;border-top:none;border-bottom:'+bot+';background:'+bg+';font-size:12px;font-weight:500;color:'+color+';white-space:nowrap';
+          const baseStyle='text-align:center;padding:'+pad+';border-left:1px solid #1A2F4A;border-top:none;border-bottom:'+bot+';background:'+bg+';font-size:14px;font-weight:500;color:'+color+';white-space:nowrap';
           html+='<td style="'+baseStyle+'"><div class="rh-cell-wrap">'+starHtml+cellInner+pencilHtml+'</div></td>';
         });
         html+=`<td style="background:#071828;border-left:1px solid #1A2F4A;border-top:none;border-bottom:${isLast?'none':'1px solid #1A2F4A'}"></td>`;
@@ -1158,7 +1159,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     function fleetCompanyTab(name){
       const active=fleetCompany===name;
       return `<div onclick="switchFleetCompany('${name}')"
-        style="padding:9px 20px;cursor:pointer;font-size:13px;font-weight:${active?'700':'400'};
+        style="padding:9px 20px;cursor:pointer;font-size:15px;font-weight:${active?'700':'400'};
                color:${active?'#FFFFFF':'#7A9AB0'};
                border-bottom:${active?'2px solid #0D9AAA':'2px solid transparent'};
                margin-bottom:-2px;
@@ -1172,7 +1173,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     function renderRunhrs(){
       const container=document.getElementById('v-runhrs');
       let html=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <span style="font-size:12px;color:#8AA8C0">Viewing:</span>
+        <span style="font-size:14px;color:#8AA8C0">Viewing:</span>
         <select id="rh-month-sel" onchange="rhMonthChange()" style="width:130px"></select>
         <select id="rh-year-sel" onchange="rhYearChange()" style="width:90px"></select>
       </div><div id="rh-sea-wrap"></div><div id="rh-sg-wrap"></div>`;
@@ -1196,9 +1197,9 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       let html=`<div id="${prefix}-header" onclick="toggleRhAccordion('${prefix}')"
         style="background:#0D1F3C;border:1px solid #1E3A5F;border-radius:8px 8px 0 0;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;margin-top:14px">
         <div style="width:9px;height:9px;border-radius:50%;background:#1A9A6A"></div>
-        <div style="font-size:14px;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:0.06em;flex:1">${name}</div>
-        <div style="font-size:11px;color:#8AA8C0">${boats.length} vessels</div>
-        <div id="${prefix}-chev" class="chevron" style="font-size:12px;color:#8AA8C0">▶</div></div>
+        <div style="font-size:16px;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:0.06em;flex:1">${name}</div>
+        <div style="font-size:13px;color:#8AA8C0">${boats.length} vessels</div>
+        <div id="${prefix}-chev" class="chevron" style="font-size:14px;color:#8AA8C0">▶</div></div>
       <div id="${bodyId}" style="border:1px solid #1E3A5F;border-top:none;border-radius:0 0 8px 8px;overflow:hidden;display:${isSea?'block':'none'}">`;
       boats.forEach(boat=>{
         const portCur=getLatestRunHrs(boat,'Port');const stbdCur=getLatestRunHrs(boat,'Stbd');
@@ -1206,9 +1207,9 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         html+=`<div onclick="toggleRhBoat('${prefix}','${boat}')"
           style="background:#0A1628;border-bottom:1px solid #1A2F4A;padding:10px 16px;display:flex;align-items:center;gap:8px;cursor:pointer">
           <div style="width:9px;height:9px;border-radius:50%;background:${svcCol}"></div>
-          <div style="flex:1;font-size:14px;font-weight:600;color:#FFFFFF">${boat}</div>
-          <div style="font-size:11px;color:#8AA8C0">Port: ${portCur!==null?Math.round(portCur).toLocaleString('en-SG'):'—'} · Stbd: ${stbdCur!==null?Math.round(stbdCur).toLocaleString('en-SG'):'—'}</div>
-          <div id="${prefix}-${boat}-chev" class="chevron" style="font-size:11px;color:#8AA8C0">▶</div></div>
+          <div style="flex:1;font-size:16px;font-weight:600;color:#FFFFFF">${boat}</div>
+          <div style="font-size:13px;color:#8AA8C0">Port: ${portCur!==null?Math.round(portCur).toLocaleString('en-SG'):'—'} · Stbd: ${stbdCur!==null?Math.round(stbdCur).toLocaleString('en-SG'):'—'}</div>
+          <div id="${prefix}-${boat}-chev" class="chevron" style="font-size:13px;color:#8AA8C0">▶</div></div>
           <div id="${prefix}-${boat}-grid" style="display:none">${monthlyRunhrsGridHTML(boat)}</div>`;
       });
       html+=`</div>`;
@@ -1236,10 +1237,10 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       const portMap=monthlyHrsMap(boat,'Port',runhrsMonth,runhrsYear);
       const stbdMap=monthlyHrsMap(boat,'Stbd',runhrsMonth,runhrsYear);
       let thead='<tr>';
-      thead+=`<th style="text-align:left;width:160px;min-width:160px;background:#0D1F3C;color:#FFFFFF;font-size:11px;font-weight:500;padding:5px 10px;border:1px solid #1E3A5F"></th>`;
+      thead+=`<th style="text-align:left;width:160px;min-width:160px;background:#0D1F3C;color:#FFFFFF;font-size:13px;font-weight:500;padding:5px 10px;border:1px solid #1E3A5F"></th>`;
       for(let d=1;d<=dim;d++){
         const isToday=isThisMo&&d===todayD;const isFuture=isThisMo&&d>todayD;
-        thead+=`<th style="text-align:center;min-width:38px;background:${isToday?'#0D2A3A':'#0D1F3C'};color:${isFuture?'#3A4A60':'#FFFFFF'};font-size:11px;font-weight:${isToday?'700':'500'};padding:5px 6px;border:1px solid #1E3A5F">${d}</th>`;
+        thead+=`<th style="text-align:center;min-width:38px;background:${isToday?'#0D2A3A':'#0D1F3C'};color:${isFuture?'#3A4A60':'#FFFFFF'};font-size:13px;font-weight:${isToday?'700':'500'};padding:5px 6px;border:1px solid #1E3A5F">${d}</th>`;
       }
       thead+='</tr>';
       function mkrow(label,getter,isDiff){
@@ -1267,33 +1268,33 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       const footer=`<div style="display:flex;gap:8px;margin-top:10px">
         <div style="flex:1;background:#0D1F3C;border:1px solid #1A2F4A;border-radius:6px;padding:10px 14px">
           <div style="font-size:var(--fs-t5);font-weight:700;color:#FFFFFF;margin-bottom:3px">Port — ${MONTH_NAMES[runhrsMonth]} total</div>
-          <div style="font-size:18px;font-weight:700;color:#1A9A6A">—</div></div>
+          <div style="font-size:22px;font-weight:700;color:#1A9A6A">—</div></div>
         <div style="flex:1;background:#0D1F3C;border:1px solid #1A2F4A;border-radius:6px;padding:10px 14px">
           <div style="font-size:var(--fs-t5);font-weight:700;color:#FFFFFF;margin-bottom:3px">Stbd — ${MONTH_NAMES[runhrsMonth]} total</div>
-          <div style="font-size:18px;font-weight:700;color:#1A9A6A">—</div></div>
+          <div style="font-size:22px;font-weight:700;color:#1A9A6A">—</div></div>
         <div style="flex:1;background:#0D1F3C;border:1px solid #1A2F4A;border-radius:6px;padding:10px 14px">
           <div style="font-size:var(--fs-t5);font-weight:700;color:#FFFFFF;margin-bottom:3px">Port → next service</div>
-          <div style="font-size:18px;font-weight:700;color:#1A9A6A">—</div></div></div>`;
+          <div style="font-size:22px;font-weight:700;color:#1A9A6A">—</div></div></div>`;
       return `<div style="margin-top:6px">
-        <div style="padding:10px 14px;background:#071828;border-bottom:1px solid #1E3A5F"><div style="font-size:15px;font-weight:700;color:#FFFFFF">${boat}</div></div>
-        <table style="width:100%;border-collapse:collapse;font-size:12px"><thead>${thead}</thead><tbody>${tbody}</tbody></table>
+        <div style="padding:10px 14px;background:#071828;border-bottom:1px solid #1E3A5F"><div style="font-size:17px;font-weight:700;color:#FFFFFF">${boat}</div></div>
+        <table style="width:100%;border-collapse:collapse;font-size:14px"><thead>${thead}</thead><tbody>${tbody}</tbody></table>
         ${footer}</div>`;
     }
 
     // ── ENGINE SPECS ──
     function renderSpecs(){
       const container=document.getElementById('v-specs');
-      let html=`<div style="background:#071828;border:1px solid #1E3A5F;border-radius:4px;padding:8px 12px;margin-bottom:14px;font-size:11px;color:#8AA8C0">Spec data is entered in the EngineSpecs tab of the Google Sheet. To update: edit the sheet directly, then refresh.</div>`;
-      if(!specRows.length){html+=`<div style="background:#0D1F3C;border:1px solid #1A2F4A;border-radius:8px;padding:16px;text-align:center;font-size:12px;color:#D4920A">No engine spec data found. Please add the EngineSpecs tab to the Google Sheet.</div>`;container.innerHTML=html;return;}
+      let html=`<div style="background:#071828;border:1px solid #1E3A5F;border-radius:4px;padding:8px 12px;margin-bottom:14px;font-size:13px;color:#8AA8C0">Spec data is entered in the EngineSpecs tab of the Google Sheet. To update: edit the sheet directly, then refresh.</div>`;
+      if(!specRows.length){html+=`<div style="background:#0D1F3C;border:1px solid #1A2F4A;border-radius:8px;padding:16px;text-align:center;font-size:14px;color:#D4920A">No engine spec data found. Please add the EngineSpecs tab to the Google Sheet.</div>`;container.innerHTML=html;return;}
       html+=specSection('Sea Cabbie',SEA_CABBIE,true)+specSection('SG Shipping',SG_SHIPPING,false);
       container.innerHTML=html;
     }
 
     function specSection(label,boats,isFirst){
       const rows=specRows.filter(r=>boats.includes(r['Boat']));
-      let html=`<div style="font-size:11px;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:0.08em;margin:${isFirst?'0':'12px 0 7px'}">${label}</div>
+      let html=`<div style="font-size:13px;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:0.08em;margin:${isFirst?'0':'12px 0 7px'}">${label}</div>
       <div style="background:#0D1F3C;border:1px solid #1A2F4A;border-radius:8px;overflow:hidden;margin-bottom:8px">
-        <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <table style="width:100%;border-collapse:collapse;font-size:14px">
           <thead><tr style="background:#071828;color:#FFFFFF;font-size:var(--fs-t6);font-weight:600;text-transform:uppercase;letter-spacing:0.06em">
             <th style="padding:6px 10px;border-bottom:1px solid #1E3A5F;width:100px;text-align:left">Boat</th>
             <th style="padding:6px 10px;border-bottom:1px solid #1E3A5F;width:50px;text-align:left">Side</th>
@@ -1306,8 +1307,8 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         const stbd=rows.find(r=>r['Boat']===boat&&r['Engine Side']==='Stbd');
         if(!port&&!stbd){html+=`<tr><td style="padding:16px;color:#3A4A60;text-align:center" colspan="5">—</td></tr>`;return;}
         const span=(port&&stbd)?'2':'1';
-        if(port)html+=`<tr style="border-bottom:1px solid #1A2F4A"><td rowspan="${span}" style="padding:7px 10px;border-right:1px solid #1A2F4A;font-size:13px;font-weight:600;color:#FFFFFF;vertical-align:middle">${boat}</td><td style="padding:7px 10px;font-size:12px;color:#FFFFFF">${port['Engine Side']||'Port'}</td><td style="padding:7px 10px;font-size:12px;color:#FFFFFF">${port['Engine Model']||'—'}</td><td style="padding:7px 10px;font-size:12px;color:#FFFFFF;text-align:right">${port['Power (kW)']||'—'}</td><td style="padding:7px 10px;font-size:12px;color:#FFFFFF;text-align:right">${port['Year Installed']||'—'}</td></tr>`;
-        if(stbd)html+=`<tr style="border-bottom:1px solid #1A2F4A"><td style="padding:7px 10px;font-size:12px;color:#FFFFFF">${stbd['Engine Side']||'Stbd'}</td><td style="padding:7px 10px;font-size:12px;color:#FFFFFF">${stbd['Engine Model']||'—'}</td><td style="padding:7px 10px;font-size:12px;color:#FFFFFF;text-align:right">${stbd['Power (kW)']||'—'}</td><td style="padding:7px 10px;font-size:12px;color:#FFFFFF;text-align:right">${stbd['Year Installed']||'—'}</td></tr>`;
+        if(port)html+=`<tr style="border-bottom:1px solid #1A2F4A"><td rowspan="${span}" style="padding:7px 10px;border-right:1px solid #1A2F4A;font-size:15px;font-weight:600;color:#FFFFFF;vertical-align:middle">${boat}</td><td style="padding:7px 10px;font-size:14px;color:#FFFFFF">${port['Engine Side']||'Port'}</td><td style="padding:7px 10px;font-size:14px;color:#FFFFFF">${port['Engine Model']||'—'}</td><td style="padding:7px 10px;font-size:14px;color:#FFFFFF;text-align:right">${port['Power (kW)']||'—'}</td><td style="padding:7px 10px;font-size:14px;color:#FFFFFF;text-align:right">${port['Year Installed']||'—'}</td></tr>`;
+        if(stbd)html+=`<tr style="border-bottom:1px solid #1A2F4A"><td style="padding:7px 10px;font-size:14px;color:#FFFFFF">${stbd['Engine Side']||'Stbd'}</td><td style="padding:7px 10px;font-size:14px;color:#FFFFFF">${stbd['Engine Model']||'—'}</td><td style="padding:7px 10px;font-size:14px;color:#FFFFFF;text-align:right">${stbd['Power (kW)']||'—'}</td><td style="padding:7px 10px;font-size:14px;color:#FFFFFF;text-align:right">${stbd['Year Installed']||'—'}</td></tr>`;
       });
       return html+`</tbody></table></div>`;
     }
@@ -1342,7 +1343,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     async function renderBoatSpecs(){
       const wrap=document.getElementById('v-boatspecs');
       // Show loading state
-      wrap.innerHTML='<div style="padding:20px;color:#8AA8C0;font-size:12px">Loading specs...</div>';
+      wrap.innerHTML='<div style="padding:20px;color:#8AA8C0;font-size:14px">Loading specs...</div>';
       await loadBoatSpecs();
       await fetchBoatspecsOverrides();
       let sb=`<div style="width:185px;min-width:185px;border-right:1px solid #1E3A5F;background:#0D1F3C;overflow-y:auto;display:flex;flex-direction:column">`;
@@ -1362,10 +1363,10 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     function bsR(label,val){const e=!val||val===''||String(val).toLowerCase()==='na';if(e)return '';return `<div style="display:flex;align-items:baseline;padding:6px 0;border-bottom:0.5px solid #1A2F4A"><span style="font-size:var(--fs-t5);color:var(--color-label);white-space:nowrap;width:190px;flex-shrink:0">${label}</span><span style="font-size:var(--fs-t4);font-weight:500;color:var(--color-value)">${val}</span></div>`;}
     function bsInp(label,key,val){
       const k=(key||'').replace(/"/g,'&quot;');
-      return `<div style="display:flex;align-items:baseline;padding:5px 0;border-bottom:0.5px solid #1A2F4A;gap:8px"><span style="font-size:11px;color:#8AA8C0;white-space:nowrap;width:190px;flex-shrink:0">${label}</span><input class="cert-ei bs-spec-field" data-bs-key="${k}" value="${rhEscAttr(String(val==null?'':val))}" style="flex:1;min-width:0;font-size:11px"/></div>`;
+      return `<div style="display:flex;align-items:baseline;padding:5px 0;border-bottom:0.5px solid #1A2F4A;gap:8px"><span style="font-size:13px;color:#8AA8C0;white-space:nowrap;width:190px;flex-shrink:0">${label}</span><input class="cert-ei bs-spec-field" data-bs-key="${k}" value="${rhEscAttr(String(val==null?'':val))}" style="flex:1;min-width:0;font-size:13px"/></div>`;
     }
     function bsSec(t){return `<div style="font-size:var(--fs-t3);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-heading);padding-bottom:7px;border-bottom:1px solid rgba(91,196,168,0.3);margin-bottom:10px;margin-top:20px">${t}</div>`;}
-    function bsHull(h){if(!h)return '';const bg=h==='Aluminium'?'#0D2A10':h==='Wood'?'#2A1A05':'#071828';const bc=h==='Aluminium'?'#1A6A2A':h==='Wood'?'#6A4A0A':'#1A4A6A';return `<span style="display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:500;background:${bg};border:0.5px solid ${bc};color:#FFFFFF;margin-left:8px">${h}</span>`;}
+    function bsHull(h){if(!h)return '';const bg=h==='Aluminium'?'#0D2A10':h==='Wood'?'#2A1A05':'#071828';const bc=h==='Aluminium'?'#1A6A2A':h==='Wood'?'#6A4A0A':'#1A4A6A';return `<span style="display:inline-block;padding:2px 9px;border-radius:99px;font-size:13px;font-weight:500;background:${bg};border:0.5px solid ${bc};color:#FFFFFF;margin-left:8px">${h}</span>`;}
     function bsDetailHTML(name){
       const b=bsMerged(name);if(!b||!Object.keys(b).length)return '<div style="color:#3A4A60;padding:20px">Select a vessel</div>';
       const ed=typeof can!=='undefined'&&can.editBoatSpecs&&can.editBoatSpecs();
@@ -1387,7 +1388,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('Model','Generator Model')}${row('Engine','Generator Engine')}</div><div></div></div>`;
       h+=bsSec('Propulsion &amp; fittings');
       h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('Propeller','Propeller Size')}${row('Shaft size','Shaft Size')}</div><div>${row('Rudder','Rudder Size')}${row('Steering type','Steering Type')}</div></div>`;
-      if(ed)h+=`<div style="margin-top:20px"><button type="button" onclick="bsSaveSpecs()" style="padding:10px 20px;background:#0D6A7A;border:none;border-radius:8px;color:#FFFFFF;font-weight:600;cursor:pointer;font-size:12px;font-family:inherit">Save specs</button></div>`;
+      if(ed)h+=`<div style="margin-top:20px"><button type="button" onclick="bsSaveSpecs()" style="padding:10px 20px;background:#0D6A7A;border:none;border-radius:8px;color:#FFFFFF;font-weight:600;cursor:pointer;font-size:14px;font-family:inherit">Save specs</button></div>`;
       return h;
     }
 
@@ -1861,7 +1862,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
           ${certs.map(c=>certGridRow(c.name,c.expiry,boat,band.label,c.windowFrom,c.windowTo)).join('')}
         </div>`;
       });
-      if(!blocks) blocks=`<div style="color:#4A6A8A;font-size:12px;text-align:center;margin-top:32px">No certificates in this category.</div>`;
+      if(!blocks) blocks=`<div style="color:#4A6A8A;font-size:14px;text-align:center;margin-top:32px">No certificates in this category.</div>`;
       panel.innerHTML=cards+blocks;
       panel.style.display='block';
       applyRoleGating();
@@ -1910,8 +1911,8 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         delBtn.style.display='none';
         dlBtn.style.opacity='0.4'; dlBtn.style.pointerEvents='none';
         display.innerHTML=`<div style="font-size:44px;margin-bottom:14px">📄</div>
-          <div style="font-size:13px;font-weight:600;color:#4A7AA0;margin-bottom:6px">No file uploaded yet</div>
-          <div style="font-size:11px;color:#3A5A78;line-height:1.7">Click "Upload" to attach a certificate file.<br>Supported formats: PDF · JPG · PNG</div>`;
+          <div style="font-size:15px;font-weight:600;color:#4A7AA0;margin-bottom:6px">No file uploaded yet</div>
+          <div style="font-size:13px;color:#3A5A78;line-height:1.7">Click "Upload" to attach a certificate file.<br>Supported formats: PDF · JPG · PNG</div>`;
       }
     }
     function certHandleFileUpload(input){
@@ -2137,7 +2138,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
             /* Tab title: Chakra Petch */
             body.theme-scifi #module-nav > div > div:first-child {
               font-family: 'Chakra Petch', monospace !important;
-              font-size: 12px !important;
+              font-size: 14px !important;
               letter-spacing: 0.12em !important;
               text-transform: uppercase !important;
               color: var(--sf-text) !important;
@@ -2191,14 +2192,14 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
             }
             body.theme-scifi #v-daily > div:first-child strong {
               font-family: 'Chakra Petch', monospace !important;
-              font-size: 13px !important;
+              font-size: 15px !important;
               letter-spacing: 0.15em;
               color: #ffffff !important;
               text-transform: uppercase;
             }
             body.theme-scifi #v-daily > div:first-child > span {
               font-family: 'Chakra Petch', monospace !important;
-              font-size: 12px;
+              font-size: 14px;
               color: var(--sf-text) !important;
             }
 
@@ -2241,7 +2242,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
             body.theme-scifi div[style*="border-radius:7px"] div[style*="font-weight:700"][style*="text-transform:uppercase"] {
               font-family: 'Chakra Petch', monospace !important;
               letter-spacing: 0.15em !important;
-              font-size: 15px !important;
+              font-size: 17px !important;
               color: #ffffff !important;
             }
             body.theme-scifi div[style*="border-radius:7px"] div[style*="font-size:var(--fs-t6)"] {
@@ -2339,7 +2340,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
             }
             body.theme-scifi .scifi-group-label > div:nth-child(2) {
               font-family: 'Chakra Petch', monospace !important;
-              font-size: 11px !important;
+              font-size: 13px !important;
               letter-spacing: 0.15em !important;
               text-transform: uppercase !important;
               color: var(--sf-text) !important;
@@ -2350,7 +2351,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
               color: #3b82f6 !important;
               border-radius: 4px !important;
               font-family: 'Chakra Petch', monospace !important;
-              font-size: 11px !important;
+              font-size: 13px !important;
               padding: 1px 6px !important;
             }
 
@@ -2396,7 +2397,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
             /* Boat name: Chakra Petch mono */
             body.theme-scifi .theme-boat-card .scifi-boat-name {
               font-family: 'Chakra Petch', monospace !important;
-              font-size: 12px !important;
+              font-size: 14px !important;
               letter-spacing: 0.08em !important;
               color: #cbd5e1 !important;
               transition: color .2s;
@@ -2588,7 +2589,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
             }
             body.theme-cyber #module-nav > div > div:first-child {
               font-family: 'Orbitron', sans-serif !important;
-              font-size: 13px !important;
+              font-size: 15px !important;
               letter-spacing: 0.1em;
             }
             body.theme-cyber * { transition: border-color .2s, box-shadow .2s, background .2s; }
@@ -2621,7 +2622,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
             body.theme-cyber .hdr-title {
               font-family: 'Orbitron', sans-serif !important;
               letter-spacing: 0.15em !important;
-              font-size: 14px !important;
+              font-size: 16px !important;
               color: #00e5ff !important;
             }
             body.theme-cyber .chip-green {
@@ -2712,25 +2713,25 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
 .ln-sub-line{height:1px;width:32px;}
 .ln-sub-line.l{background:linear-gradient(to right,transparent,#00f0ff);}
 .ln-sub-line.r{background:linear-gradient(to left,transparent,#00f0ff);}
-.ln-sub-text{font-family:'Space Mono',monospace;font-size:12px;color:#00f0ff;text-transform:uppercase;letter-spacing:0.4em;}
+.ln-sub-text{font-family:'Space Mono',monospace;font-size:14px;color:#00f0ff;text-transform:uppercase;letter-spacing:0.4em;}
 .ln-input-group{position:relative;margin-bottom:32px;}
 .ln-input-border{position:absolute;inset:0;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.1);transition:background 0.3s,border-color 0.3s;pointer-events:none;}
 .ln-input-group:focus-within .ln-input-border{background:rgba(0,240,255,0.05);border-color:rgba(0,240,255,0.5);}
 .ln-input-underline{position:absolute;bottom:0;left:50%;transform:translateX(-50%);height:2px;width:0;background:#00f0ff;box-shadow:0 0 10px #00f0ff;transition:width 0.5s ease-out;pointer-events:none;}
 .ln-input-group:focus-within .ln-input-underline{width:100%;}
 .ln-input-inner{position:relative;display:flex;align-items:center;padding:16px 20px;}
-.ln-input-field{position:relative;z-index:10;width:100%;background:transparent;border:none;outline:none;color:#ffffff;font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:500;-webkit-text-fill-color:#ffffff;}
+.ln-input-field{position:relative;z-index:10;width:100%;background:transparent;border:none;outline:none;color:#ffffff;font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:500;-webkit-text-fill-color:#ffffff;}
 .ln-input-field::placeholder{color:transparent;}
-.ln-input-label{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:#94a3b8;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:500;letter-spacing:0.04em;pointer-events:none;transition:transform 0.3s,color 0.3s,background-color 0.3s,padding 0.3s,letter-spacing 0.3s;z-index:20;}
+.ln-input-label{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:#94a3b8;font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:500;letter-spacing:0.04em;pointer-events:none;transition:transform 0.3s,color 0.3s,background-color 0.3s,padding 0.3s,letter-spacing 0.3s;z-index:20;}
 .ln-input-field:not(:placeholder-shown) ~ .ln-input-label,.ln-input-field:focus ~ .ln-input-label{transform:translateY(-24px) scale(0.85);color:#00f0ff;background-color:#060f1e;padding:0 8px;letter-spacing:0.1em;}
 .ln-input-field:-webkit-autofill,.ln-input-field:-webkit-autofill:hover,.ln-input-field:-webkit-autofill:focus,.ln-input-field:-webkit-autofill:active{-webkit-box-shadow:0 0 0 30px #0a192f inset !important;-webkit-text-fill-color:#ffffff !important;transition:background-color 5000s ease-in-out 0s;}
 .ln-input-ph-wrap{margin-left:16px;flex-shrink:0;z-index:10;color:#64748b;transition:color 0.3s;display:flex;align-items:center;}
 .ln-input-group:focus-within .ln-input-ph-wrap{color:#00f0ff;}
 .ln-input-ph-wrap i{font-size:28px;filter:drop-shadow(0 0 8px currentColor);line-height:1;}
 .ln-pass-spacer{width:28px;margin-left:16px;flex-shrink:0;}
-#login-error{font-family:'Space Mono',monospace;font-size:11px;color:#f87171;min-height:16px;text-align:center;margin-bottom:12px;letter-spacing:0.04em;}
+#login-error{font-family:'Space Mono',monospace;font-size:13px;color:#f87171;min-height:16px;text-align:center;margin-bottom:12px;letter-spacing:0.04em;}
 .ln-form-actions{padding-top:24px;}
-.ln-btn{position:relative;width:100%;padding:16px;background:rgba(8,60,70,0.3);border:1px solid rgba(0,240,255,0.4);clip-path:polygon(15px 0,100% 0,100% calc(100% - 15px),calc(100% - 15px) 100%,0 100%,0 15px);color:#00f0ff;font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;overflow:hidden;transition:box-shadow 0.3s,border-color 0.3s;outline:none;}
+.ln-btn{position:relative;width:100%;padding:16px;background:rgba(8,60,70,0.3);border:1px solid rgba(0,240,255,0.4);clip-path:polygon(15px 0,100% 0,100% calc(100% - 15px),calc(100% - 15px) 100%,0 100%,0 15px);color:#00f0ff;font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;overflow:hidden;transition:box-shadow 0.3s,border-color 0.3s;outline:none;}
 .ln-btn:hover{box-shadow:0 0 30px rgba(0,240,255,0.4);border-color:#00f0ff;}
 .ln-btn:focus{outline:none;box-shadow:0 0 0 2px rgba(0,240,255,0.5),0 0 0 4px #020617;}
 .ln-btn-fill{position:absolute;inset:0;background:#00f0ff;transform:translateY(100%);transition:transform 0.3s ease-in-out;z-index:0;}
@@ -2824,7 +2825,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     <!-- TECHNICAL DASHBOARD centre box -->
     <div style="flex:1;display:flex;justify-content:center">
       <div style="display:inline-flex;flex-direction:column;align-items:center;padding:7px 28px;background:#0A1E30;border:1.5px solid #1E4A7A;border-radius:8px;box-shadow:0 0 14px rgba(13,80,150,0.25)">
-        <div style="font-size:16px;font-weight:800;color:#FFFFFF;letter-spacing:0.12em;text-transform:uppercase">TECHNICAL DASHBOARD</div>
+        <div style="font-size:20px;font-weight:800;color:#FFFFFF;letter-spacing:0.12em;text-transform:uppercase">TECHNICAL DASHBOARD</div>
       </div>
     </div>
 
@@ -2842,27 +2843,27 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
 
   <div id="module-nav" style="background:#0D1F3C;border-bottom:1px solid #1E3A5F;padding:0 18px;display:flex;align-items:flex-end;gap:6px;flex-shrink:0">
     <div id="tab-daily" onclick="switchModule('daily')" style="padding:5px 10px 0;margin-top:5px;border:1px solid #1E3A5F;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:1">
-      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Daily Reports</div>
+      <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Daily Reports</div>
       <div style="display:flex;gap:2px;margin-top:3px">
         <div class="ttab on" onclick="event.stopPropagation();switchModule('daily');switchDailyView('daily',this)" style="padding:5px 12px;font-size:var(--fs-t5);border-radius:4px 4px 0 0">Daily view</div>
         <div class="ttab" onclick="event.stopPropagation();switchModule('daily');switchDailyView('monthly',this)" style="padding:5px 12px;font-size:var(--fs-t5);border-radius:4px 4px 0 0">Monthly view</div>
       </div>
     </div>
     <div id="tab-runhrs" onclick="switchModule('runhrs')" style="padding:5px 10px 0;margin-top:5px;border:1px solid #0D8A9A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
-      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Engine Run-hrs Records</div>
+      <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Engine Run-hrs Records</div>
       <div style="display:flex;gap:2px;margin-top:3px">
         <div class="stab on" onclick="event.stopPropagation();switchModule('runhrs');switchRunhrsView('fleet',this)" style="padding:5px 12px;font-size:var(--fs-t5);border-radius:4px 4px 0 0">Fleet monthly overview</div>
         <div class="stab" onclick="event.stopPropagation();switchModule('runhrs');switchRunhrsView('runhrs',this)" style="padding:5px 12px;font-size:var(--fs-t5);border-radius:4px 4px 0 0">Monthly running hours</div>
       </div>
     </div>
     <div id="tab-boatspecs" onclick="switchModule('boatspecs')" style="padding:5px 10px 0;margin-top:5px;border:1px solid #1A6A3A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
-      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Boat Tech. Specs</div>
+      <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Boat Tech. Specs</div>
       <div style="display:flex;gap:2px;margin-top:3px">
         <div class="btab on" style="padding:5px 12px;font-size:var(--fs-t5);border-radius:4px 4px 0 0;color:#FFFFFF;font-weight:500;background:#0D2A1A;border-bottom:2px solid #1A9A5A">All vessels</div>
       </div>
     </div>
     <div id="tab-certs" onclick="switchModule('certs')" style="padding:5px 10px 0;margin-top:5px;border:1px solid #2A6A9A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
-      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Certification</div>
+      <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Certification</div>
       <div style="display:flex;gap:2px;margin-top:3px">
         <div style="padding:5px 12px;font-size:var(--fs-t5);border-radius:4px 4px 0 0;color:#5AB8E8;font-weight:500;background:#081828;border-bottom:2px solid #3A8FBF">Compliance</div>
       </div>
@@ -2888,11 +2889,11 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         <div id="v-daily" style="overflow-y:auto;padding:14px 18px;flex:1"></div>
         <div id="v-monthly" style="display:none;overflow:auto;padding:14px 18px;flex:1">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-            <button onclick="prevMonth()" style="width:22px;height:22px;background:none;border:0.5px solid #1E3A5F;border-radius:5px;cursor:pointer;font-size:13px;color:#8AA8C0">&#8249;</button>
-            <div><span id="mv-boat" style="font-size:13px;font-weight:500;color:#FFFFFF"></span><span id="mv-month" style="font-size:11px;color:#8AA8C0"></span></div>
-            <button onclick="nextMonth()" style="width:22px;height:22px;background:none;border:0.5px solid #1E3A5F;border-radius:5px;cursor:pointer;font-size:13px;color:#8AA8C0">&#8250;</button>
+            <button onclick="prevMonth()" style="width:22px;height:22px;background:none;border:0.5px solid #1E3A5F;border-radius:5px;cursor:pointer;font-size:15px;color:#8AA8C0">&#8249;</button>
+            <div><span id="mv-boat" style="font-size:15px;font-weight:500;color:#FFFFFF"></span><span id="mv-month" style="font-size:13px;color:#8AA8C0"></span></div>
+            <button onclick="nextMonth()" style="width:22px;height:22px;background:none;border:0.5px solid #1E3A5F;border-radius:5px;cursor:pointer;font-size:15px;color:#8AA8C0">&#8250;</button>
           </div>
-          <table id="grid-table" style="border-collapse:collapse;font-size:11px;min-width:100%"></table>
+          <table id="grid-table" style="border-collapse:collapse;font-size:13px;min-width:100%"></table>
         </div>
       </div>
     </div>
@@ -2978,21 +2979,21 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
   <div style="background:#0D1F3C;border:1px solid #1E3A5F;border-radius:12px;width:490px;max-width:92%;max-height:86vh;display:flex;flex-direction:column;overflow:hidden">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:13px 17px 10px;border-bottom:1px solid #1E3A5F;flex-shrink:0">
       <div>
-        <div id="modal-boat" style="font-size:13px;font-weight:600;color:#FFFFFF"></div>
+        <div id="modal-boat" style="font-size:15px;font-weight:600;color:#FFFFFF"></div>
         <div id="modal-date" style="font-size:var(--fs-t6);color:#8AA8C0;margin-top:3px"></div>
         <div id="modal-badge" style="margin-top:5px"></div>
       </div>
-      <button onclick="closeModal()" style="background:none;border:none;color:#8AA8C0;font-size:18px;cursor:pointer;padding:0 0 0 10px;line-height:1"
+      <button onclick="closeModal()" style="background:none;border:none;color:#8AA8C0;font-size:22px;cursor:pointer;padding:0 0 0 10px;line-height:1"
         onmouseover="this.style.color='#FFFFFF'" onmouseout="this.style.color='#8AA8C0'">&#x2715;</button>
     </div>
     <div id="modal-body" style="overflow-y:auto;padding:13px 17px;flex:1"></div>
     <div style="padding:11px 17px;border-top:1px solid #1E3A5F;flex-shrink:0;display:flex;gap:7px">
       <div onclick="downloadPDF()" onmouseover="this.style.background='#0D4A5A'" onmouseout="this.style.background='#0D3A4A'"
-        style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 0;border-radius:6px;background:#0D3A4A;border:1px solid #1E5A6A;color:#FFFFFF;font-size:11px;font-weight:500;cursor:pointer">
+        style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 0;border-radius:6px;background:#0D3A4A;border:1px solid #1E5A6A;color:#FFFFFF;font-size:13px;font-weight:500;cursor:pointer">
         &#8659;&nbsp;Download PDF report
       </div>
       <div onclick="closeModal()" onmouseover="this.style.color='#FFFFFF';this.style.borderColor='#2A4A5A'" onmouseout="this.style.color='#8AA8C0';this.style.borderColor='#1E3A5F'"
-        style="padding:8px 16px;border-radius:6px;background:transparent;border:1px solid #1E3A5F;color:#8AA8C0;font-size:11px;cursor:pointer">Close</div>
+        style="padding:8px 16px;border-radius:6px;background:transparent;border:1px solid #1E3A5F;color:#8AA8C0;font-size:13px;cursor:pointer">Close</div>
     </div>
   </div>
 </div>
@@ -3003,7 +3004,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
   <div style="background:#0D1F3C;border:1px solid #2A5A7A;border-radius:12px;width:560px;max-width:94%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6)">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid #1E3A5F;flex-shrink:0">
       <div>
-        <div id="certDocTitle" style="font-size:13px;font-weight:700;color:#FFFFFF"></div>
+        <div id="certDocTitle" style="font-size:15px;font-weight:700;color:#FFFFFF"></div>
         <div id="certDocSub"   style="font-size:var(--fs-t6);color:#8AA8C0;margin-top:3px"></div>
         <div id="certDocCategory" style="display:inline-block;margin-top:6px;padding:2px 9px;background:#0D2A3A;border:0.5px solid #2A5A7A;border-radius:4px;font-size:var(--fs-t6);font-weight:700;color:#5AB8E8;letter-spacing:0.1em;text-transform:uppercase">Certificate</div>
       </div>
@@ -3014,18 +3015,18 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       <!-- Preview area -->
       <div id="certDocFileDisplay" style="width:100%;background:#06101E;border:1px dashed #1E3A5F;border-radius:8px;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;overflow:hidden">
         <div style="font-size:44px;margin-bottom:14px">📄</div>
-        <div style="font-size:13px;font-weight:600;color:#4A7AA0;margin-bottom:6px">No file uploaded yet</div>
-        <div style="font-size:11px;color:#3A5A78;line-height:1.7">Click "Upload" to attach a certificate file.<br>Supported formats: PDF · JPG · PNG</div>
+        <div style="font-size:15px;font-weight:600;color:#4A7AA0;margin-bottom:6px">No file uploaded yet</div>
+        <div style="font-size:13px;color:#3A5A78;line-height:1.7">Click "Upload" to attach a certificate file.<br>Supported formats: PDF · JPG · PNG</div>
       </div>
       <!-- Upload + Delete buttons -->
       <div style="display:flex;gap:8px">
-        <label class="cert-upload-btn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px;background:#0E2030;border:1px solid #2A5A7A;border-radius:6px;font-size:11px;color:#5AB8E8;cursor:pointer;font-weight:600;transition:background 0.15s"
+        <label class="cert-upload-btn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px;background:#0E2030;border:1px solid #2A5A7A;border-radius:6px;font-size:13px;color:#5AB8E8;cursor:pointer;font-weight:600;transition:background 0.15s"
           onmouseover="this.style.background='#122840'" onmouseout="this.style.background='#0E2030'">
           &#8679; Upload certificate file
           <input type="file" id="certDocFileInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="certHandleFileUpload(this)">
         </label>
         <div id="certDocDeleteBtn" class="cert-del-btn" onclick="certDeleteUploadedFile()"
-          style="display:none;padding:9px 14px;background:#1E0808;border:1px solid #5A1010;border-radius:6px;font-size:11px;color:#FF5555;cursor:pointer;font-weight:600;align-items:center;gap:6px;transition:background 0.15s"
+          style="display:none;padding:9px 14px;background:#1E0808;border:1px solid #5A1010;border-radius:6px;font-size:13px;color:#FF5555;cursor:pointer;font-weight:600;align-items:center;gap:6px;transition:background 0.15s"
           onmouseover="this.style.background='#2E1010'" onmouseout="this.style.background='#1E0808'">
           🗑 Delete / Replace
         </div>
@@ -3033,11 +3034,11 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     </div>
     <div style="padding:11px 18px;border-top:1px solid #1E3A5F;flex-shrink:0;display:flex;gap:8px">
       <div id="certDocDlBtn" class="cert-dl-btn" onclick="certDownloadFile()"
-        style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 0;border-radius:6px;background:#0D2A3A;border:1px solid #2A6A9A;color:#5AB8E8;font-size:11px;font-weight:600;cursor:pointer;opacity:0.4;pointer-events:none;transition:background 0.15s"
+        style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 0;border-radius:6px;background:#0D2A3A;border:1px solid #2A6A9A;color:#5AB8E8;font-size:13px;font-weight:600;cursor:pointer;opacity:0.4;pointer-events:none;transition:background 0.15s"
         onmouseover="this.style.background='#102E42'" onmouseout="this.style.background='#0D2A3A'">
         &#8659;&nbsp;Download Certificate
       </div>
-      <div onclick="closeCertDoc()" style="padding:8px 18px;border-radius:6px;background:transparent;border:1px solid #1E3A5F;color:#8AA8C0;font-size:11px;cursor:pointer"
+      <div onclick="closeCertDoc()" style="padding:8px 18px;border-radius:6px;background:transparent;border:1px solid #1E3A5F;color:#8AA8C0;font-size:13px;cursor:pointer"
         onmouseover="this.style.color='#FFFFFF'" onmouseout="this.style.color='#8AA8C0'">Close</div>
     </div>
   </div>

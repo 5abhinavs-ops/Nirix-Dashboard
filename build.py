@@ -366,7 +366,7 @@ LAYOUT_CSS = """
 #module-fleet .sp-reason{margin-top:5px!important;}
 #module-fleet #spN .sp-swatch{background:#e8eaee!important;border:1.5px solid #8892b8!important;}
 #module-fleet #spN.active{background:rgba(232,234,238,.15)!important;border-color:#e8eaee!important;}
-#module-fleet .sp-undo{background:rgba(255,255,255,.07)!important;border:1px solid rgba(255,255,255,.15)!important;color:#c5cde8!important;border-radius:8px!important;padding:7px!important;font-size:12px!important;cursor:pointer!important;width:100%!important;}
+#module-fleet .sp-undo{background:rgba(255,255,255,.07)!important;border:1px solid rgba(255,255,255,.15)!important;color:#c5cde8!important;border-radius:8px!important;padding:7px!important;font-size:14px!important;cursor:pointer!important;width:100%!important;}
 #module-fleet .sp-undo:hover{background:rgba(255,255,255,.13)!important;color:#fff!important;}
 #module-fleet.emode .cell{cursor:crosshair!important;}
 #module-fleet.emode .cell:hover{filter:brightness(.8);box-shadow:inset 0 0 0 2px #ffc832;z-index:8;}
@@ -441,7 +441,7 @@ def run_build():
 
     body = body.replace(
         '<button class="sp-apply" onclick="applyEdit()">✓ Apply colour</button>',
-        '<button class="sp-apply" onclick="applyEdit()">✓ Apply colour</button>\n    <button class="sp-undo" onclick="undoLast()" id="sp-undo" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#c5cde8;border-radius:8px;padding:7px;font-size:12px;cursor:pointer;font-family:inherit;width:100%">Undo last</button>',
+        '<button class="sp-apply" onclick="applyEdit()">✓ Apply colour</button>\n    <button class="sp-undo" onclick="undoLast()" id="sp-undo" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#c5cde8;border-radius:8px;padding:7px;font-size:14px;cursor:pointer;font-family:inherit;width:100%">Undo last</button>',
     )
     body = strip_script_tags_from_html_fragment(body)
 
@@ -450,7 +450,7 @@ def run_build():
   <div class="ln-section" id="gdrive-section">
     <div class="ln-lbl">Cloud Sync</div>
     <button class="ln-btn" onclick="driveLoad()" style="margin-bottom:4px">&#8595; Load from Drive</button>
-    <div id="gdrive-status" style="font-size:11px;color:#8892b8;margin-top:4px;min-height:14px;transition:opacity 1s"></div>
+    <div id="gdrive-status" style="font-size:13px;color:#8892b8;margin-top:4px;min-height:14px;transition:opacity 1s"></div>
   </div>'''
     body = body.replace('<div class="ln-spacer"></div>', sync_ui + '\n<div class="ln-spacer"></div>')
 
@@ -669,9 +669,9 @@ window.initFleetModule=async function(){
 
     fleet_tab = """
     <div id="tab-fleet" onclick="switchModule('fleet')" style="padding:5px 10px 0;margin-top:5px;border:1px solid #7A5A1A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
-      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Fleet Availability</div>
+      <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Fleet Availability</div>
       <div style="display:flex;gap:2px;margin-top:3px">
-        <div style="padding:5px 12px;font-size:11px;border-radius:4px 4px 0 0;color:#D4920A;font-weight:500;background:#1A1000;border-bottom:2px solid #7A5A1A">Availability Board</div>
+        <div style="padding:5px 12px;font-size:13px;border-radius:4px 4px 0 0;color:#D4920A;font-weight:500;background:#1A1000;border-bottom:2px solid #7A5A1A">Availability Board</div>
       </div>
     </div>"""
 
@@ -746,14 +746,13 @@ window.initFleetModule=async function(){
         'id="app" style="display:none;flex-direction:column;height:100vh;',
     )
 
-    # ── Minify inline JS in index.html ─────────────────────────────────────
-    # Find the main <script> block and minify it
-    script_start = idx.index('<script>') + 8
-    script_end = idx.index('</script>')
-    inline_js = idx[script_start:script_end]
-    inline_js_min = minify_js(inline_js)
-    idx = idx[:script_start] + '\n' + inline_js_min + '\n' + idx[script_end:]
-    print(f'[OK] Inline JS minified ({len(inline_js):,} -> {len(inline_js_min):,} bytes)')
+    # ── Inline JS minification (disabled for debugging) ─────────────────────
+    # script_start = idx.index('<script>') + 8
+    # script_end = idx.index('</script>')
+    # inline_js = idx[script_start:script_end]
+    # inline_js_min = minify_js(inline_js)
+    # idx = idx[:script_start] + '\n' + inline_js_min + '\n' + idx[script_end:]
+    print('[SKIP] Inline JS minification disabled for debugging')
 
     # ── Sanity checks ─────────────────────────────────────────────────────
     checks = [
