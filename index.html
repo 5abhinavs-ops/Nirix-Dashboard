@@ -1010,27 +1010,31 @@ select option { background:#0D1F3C;color:#FFFFFF; }
         var g='<div style="font-size:var(--fs-t6);font-weight:700;color:#8AA8C0;letter-spacing:0.1em;text-transform:uppercase;margin:12px 0 6px">'+title+'</div>';
         g+='<table style="border-collapse:collapse;width:100%;font-size:var(--fs-t4)">';
         g+='<thead><tr>';
-        ['Boat','FO Port (L)','FO Stbd (L)','Total (L)','Last Bunkered','Qty Bunkered (L)'].forEach(function(h){
+        ['Boat','FO Port (L)','FO Stbd (L)','FO Total (L)','All Dates Bunkered','All Quantities (L)','Total Bunker (L)'].forEach(function(h){
           g+='<th style="text-align:left;padding:6px 10px;border-bottom:2px solid #1E3A5F;font-size:var(--fs-t6);font-weight:700;color:#5A7A9A;text-transform:uppercase;letter-spacing:0.06em">'+h+'</th>';
         });
         g+='</tr></thead><tbody>';
         boats.forEach(function(boat,bi){
-          var rows=rowsForBoatMonth(boat,currentMonth,currentYear).sort(function(a,b){return new Date(b['Submitted At']||b['Date'])-new Date(a['Submitted At']||a['Date']);});
-          var latest=rows[0]||{};
+          var rows=rowsForBoatMonth(boat,currentMonth,currentYear).sort(function(a,b){return new Date(a['Submitted At']||a['Date'])-new Date(b['Submitted At']||b['Date']);});
+          var latest=rows[rows.length-1]||{};
           var foP=latest['FO Port Level (L)']||'\u2014';
           var foS=latest['FO Stbd Level (L)']||'\u2014';
-          var total=(parseFloat(foP)||0)+(parseFloat(foS)||0);
-          var totalStr=(foP==='\u2014'&&foS==='\u2014')?'\u2014':total.toFixed(0);
-          var bunkered=latest['Bunkered']||'\u2014';
-          var qtyBunkered=latest['Quantity Bunkered']||'\u2014';
+          var foTotal=(parseFloat(foP)||0)+(parseFloat(foS)||0);
+          var foTotalStr=(foP==='\u2014'&&foS==='\u2014')?'\u2014':foTotal.toFixed(0);
+          var bunkerRows=rows.filter(function(r){return r['Bunkered']==='Yes'&&r['Quantity Bunkered'];});
+          var allDates=bunkerRows.map(function(r){var ds=r['Submitted At']?toSGTDate(r['Submitted At']):(r['Date']||'').slice(0,10);return fmtDate(ds);}).join('<br>');
+          var allQtys=bunkerRows.map(function(r){return r['Quantity Bunkered']+' L';}).join('<br>');
+          var totalBunker=bunkerRows.reduce(function(s,r){return s+(parseFloat(r['Quantity Bunkered'])||0);},0);
+          var totalBunkerStr=bunkerRows.length?totalBunker.toFixed(0)+' L':'\u2014';
           var bg=bi%2===0?'#0A1628':'#0B1A2E';
           g+='<tr style="background:'+bg+'">';
           g+='<td style="padding:8px 10px;font-weight:600;color:#FFFFFF;border-bottom:1px solid #1A2F4A">'+boat+'</td>';
           g+='<td style="padding:8px 10px;color:#7ACFAA;border-bottom:1px solid #1A2F4A">'+foP+'</td>';
           g+='<td style="padding:8px 10px;color:#7ACFAA;border-bottom:1px solid #1A2F4A">'+foS+'</td>';
-          g+='<td style="padding:8px 10px;color:#FFFFFF;font-weight:600;border-bottom:1px solid #1A2F4A">'+totalStr+'</td>';
-          g+='<td style="padding:8px 10px;color:#8AA8C0;border-bottom:1px solid #1A2F4A">'+bunkered+'</td>';
-          g+='<td style="padding:8px 10px;color:#8AA8C0;border-bottom:1px solid #1A2F4A">'+qtyBunkered+'</td>';
+          g+='<td style="padding:8px 10px;color:#FFFFFF;font-weight:600;border-bottom:1px solid #1A2F4A">'+foTotalStr+'</td>';
+          g+='<td style="padding:8px 10px;color:#8AA8C0;border-bottom:1px solid #1A2F4A;line-height:1.6">'+(allDates||'\u2014')+'</td>';
+          g+='<td style="padding:8px 10px;color:#8AA8C0;border-bottom:1px solid #1A2F4A;line-height:1.6">'+(allQtys||'\u2014')+'</td>';
+          g+='<td style="padding:8px 10px;color:#5BC4A8;font-weight:600;border-bottom:1px solid #1A2F4A">'+totalBunkerStr+'</td>';
           g+='</tr>';
         });
         g+='</tbody></table>';
@@ -1563,11 +1567,32 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
           ? data.data
           : data;
         if (specsMap && typeof specsMap === 'object' && !Array.isArray(specsMap)) {
-          Object.keys(specsMap).forEach(function(boat){
-            if(!BOAT_SPECS[boat]) BOAT_SPECS[boat]={};
-            Object.keys(specsMap[boat]).forEach(function(k){
-              if(specsMap[boat][k]!==''&&specsMap[boat][k]!==null)
-                BOAT_SPECS[boat][k]=specsMap[boat][k];
+          // Normalise boat name keys from PHP (sheet uses 'Galaxy', JS expects 'SG Galaxy' etc)
+          var KEY_MAP = {'Galaxy':'SG Galaxy','Vayu1':'Vayu 1','Vayu2':'Vayu 2'};
+          // Fields that can ONLY come from the sheet (not in hardcoded data)
+          var SHEET_ONLY = ['LOA','Draft','GT','Year Built','Gearbox Serial Number','Year of Built'];
+          Object.keys(specsMap).forEach(function(rawBoat){
+            var boat = KEY_MAP[rawBoat] || rawBoat;
+            if(!BOAT_SPECS[boat]) BOAT_SPECS[boat] = {};
+            var sheetBoat = specsMap[rawBoat];
+            Object.keys(sheetBoat).forEach(function(k){
+              var val = sheetBoat[k];
+              if(val === null || val === '' || val === undefined) return;
+              // Skip the concatenated Hull SC Number field - hull is already in hardcoded data
+              if(k === 'Hull SC Number') return;
+              // Strip trailing unit suffixes from dimension fields so JS formatters work correctly
+              if(['LOA','Breadth','Depth','Draft'].indexOf(k) !== -1) {
+                val = String(val).replace(/[a-zA-Z]+$/, '').trim();
+                if(val === '') return;
+              }
+              // Sheet-only fields: always apply (hardcoded has no LOA/Draft/GT etc)
+              if(SHEET_ONLY.indexOf(k) !== -1) {
+                BOAT_SPECS[boat][k] = val; return;
+              }
+              // All other fields: only apply if hardcoded value is absent or empty
+              if(!BOAT_SPECS[boat][k] || BOAT_SPECS[boat][k] === '') {
+                BOAT_SPECS[boat][k] = val;
+              }
             });
           });
           _bsLoaded = true;
@@ -1616,7 +1641,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       let h=`<div style="font-size:var(--fs-t1);font-weight:700;color:#FFFFFF;margin-bottom:4px">${name}</div>`;
       h+=`<div style="font-size:var(--fs-t5);color:var(--color-label);margin-bottom:20px">${b['company']} &nbsp;&middot;&nbsp; ${b['SC Number']} &nbsp;&middot;&nbsp; MMSI ${b['MMSI Number']}${b['Year Built']?' &nbsp;&middot;&nbsp; Built '+b['Year Built']:''}</div>`;
       h+=bsSec('Dimensions &amp; registration');
-      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('LOA','LOA',function(v){return v?v+' m':'';})}${row('Breadth','Breadth',function(v){return v?v+' m':'';})}${row('Depth','Depth',function(v){return v?v+' m':'';})}${row('Hull material','Hull')}${b['company']==='Sea Cabbie'?'':row('Class','Class')}${row('Flag','Flag')}</div><div>${row('Pax capacity','Passenger Capacity')}${row('Crew','Crew Capacity')}${row('Mooring buoy','Mooring Buoy')}</div></div>`;
+      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('LOA','LOA',function(v){if(!v)return '';var s=String(v).replace(/\s*m$/i,'');return s+' m';})}${row('Breadth','Breadth',function(v){if(!v)return '';var s=String(v).replace(/\s*m$/i,'');return s+' m';})}${row('Depth','Depth',function(v){if(!v)return '';var s=String(v).replace(/\s*m$/i,'');return s+' m';})}${row('Hull material','Hull')}${b['company']==='Sea Cabbie'?'':row('Class','Class')}${row('Flag','Flag')}</div><div>${row('Pax capacity','Passenger Capacity')}${row('Crew','Crew Capacity')}${row('Mooring buoy','Mooring Buoy')}</div></div>`;
       h+=bsSec('Navigation equipment');
       h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('AIS','AIS')}</div><div>${row('GPS','GPS')}</div></div>`;
       h+=bsSec('Main engine');
@@ -1624,7 +1649,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       h+=bsSec('Generator');
       h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('Model','Generator Model')}${row('Engine','Generator Engine')}</div><div></div></div>`;
       h+=bsSec('Propulsion &amp; fittings');
-      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('Propeller','Propeller Size')}${row('Shaft size','Shaft Size')}</div><div>${row('Rudder','Rudder Size')}${b['company']==='Sea Cabbie'?'':row('Steering type','Steering Type')}</div></div>`;
+      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('Propeller','Propeller Size')}${row('Shaft size','Shaft Size')}</div><div>${b['company']==='Sea Cabbie'?'':row('Steering type','Steering Type')}</div></div>`;
       if(ed)h+=`<div style="margin-top:20px"><button type="button" onclick="bsSaveSpecs()" style="padding:10px 20px;background:#0D6A7A;border:none;border-radius:8px;color:#FFFFFF;font-weight:600;cursor:pointer;font-size:14px;font-family:inherit">Save specs</button></div>`;
       return h;
     }
