@@ -102,19 +102,32 @@ select option { background:#0D1F3C;color:#FFFFFF; }
 ::-webkit-scrollbar-track { background:#0A1628; }
 ::-webkit-scrollbar-thumb { background:#1E3A5F;border-radius:3px; }
 ::-webkit-scrollbar-thumb:hover { background:#2A4A6A; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.loading-pulse { animation:pulse 1.5s infinite; color:#5A7A9A; font-size:14px; padding:32px; text-align:center; }
+.stab-icon { color:inherit; }
+@media (max-width: 1024px) {
+  .cert-grid-head { display: none; }
+  .cert-grid-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "name view" "expiry expiry" "window window";
+    padding: 10px 4px;
+    row-gap: 2px;
+  }
+  .cert-name { grid-area: name; }
+  .cert-expiry { grid-area: expiry; font-size: 12px; color: #8AA8C0; }
+  .cert-window { grid-area: window; padding-left: 0; }
+  .cert-view-btn { grid-area: view; }
+  .cert-gap { display: none; }
+}
+@media (max-width: 900px) {
+  .rh-boat-label { min-width: 100px; font-size: 12px; }
+}
 
 
 </style>
   <script>
-    // nirix2026 password gate removed — Firebase Auth active (§17, Step 8)
-    // DASHBOARD_PASS retained as a fallback until Firebase confirmed working:
-    const DASHBOARD_PASS = 'nirix2026';
-    const SHEETS_API_KEY = 'AIzaSyCMq8X5Mfwdnz1Soa_RF70A6voHaA7Xm28';
-    const SHEET_ID       = '1qul0ee5Ioh526zXw-dXBakCMFZk3emJhM6lRdM6pEKA';
-    const SHEET_NAME     = 'Sheet1';
-    const SPECS_SHEET    = 'EngineSpecs';
-    const SHEET_URL      = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${SHEETS_API_KEY}`;
-    const SPECS_URL      = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SPECS_SHEET}?key=${SHEETS_API_KEY}`;
+    const SHEET_URL  = 'https://sg-portal.nirix.online/api/sheets-proxy.php?sheet=Sheet1';
+    const SPECS_URL  = 'https://sg-portal.nirix.online/api/sheets-proxy.php?sheet=EngineSpecs';
 
     const SEA_CABBIE  = ['SG Ekam','SG Naav','SG Dve','SG Trinee','SG Chatur','SG Panch','SG Sapta','SG Ashta','Vayu 1','Vayu 2','SG Rhine','KM Golf'];
     const SG_SHIPPING = ['SG Galaxy','SG Brave','SG Fortune','SG Justice','SG Patience','SG Loyalty','SG Generous','SG Integrity','SG Dhalia','SG Sunflower','SG Jasmine','SG Marigold'];
@@ -165,7 +178,7 @@ select option { background:#0D1F3C;color:#FFFFFF; }
       'Quantity bunkered (L)':      'Quantity Bunkered'
     };
 
-    let activeModule='daily', activeView='daily', activeRunhrs='fleet';
+    let activeModule='home', activeView='daily', activeRunhrs='fleet';
     let allRows=[], specRows=[], selectedBoat='SG Ekam';
     let currentMonth=new Date().getMonth(), currentYear=new Date().getFullYear();
     let runhrsMonth=new Date().getMonth(), runhrsYear=new Date().getFullYear();
@@ -603,13 +616,22 @@ select option { background:#0D1F3C;color:#FFFFFF; }
       const k = boat + '|' + side + '|' + month + '|' + year;
       const m = _runhrsEditsLatest[k];
       if (!m) return;
-      let dt = '—';
+      let dt = '\u2014';
       try {
         if (m.editedAt && m.editedAt.toDate) dt = m.editedAt.toDate().toLocaleString('en-GB');
       } catch (e2) {}
-      const msg = 'Edited by: ' + (m.editedBy || '—') + '\nDate: ' + dt +
-        '\nOriginal value: ' + m.originalValue + ' hrs\nNew value: ' + m.editedValue + ' hrs';
-      alert(msg);
+      var sideLabel = side === 'port' ? 'Port' : 'Stbd';
+      document.getElementById('modal-boat').textContent = 'Edit Audit Trail';
+      document.getElementById('modal-date').textContent = boat + ' \u2014 ' + sideLabel + ' ' + MONTH_SHORT[month] + ' ' + year;
+      document.getElementById('modal-badge').innerHTML = '';
+      document.getElementById('modal-body').innerHTML =
+        '<table style="width:100%;border-collapse:collapse;font-size:14px">' +
+        '<tr><td style="padding:8px 10px;color:#8AA8C0;border-bottom:1px solid #1A2F4A">Edited by</td><td style="padding:8px 10px;color:#FFFFFF;border-bottom:1px solid #1A2F4A">' + (m.editedBy || '\u2014') + '</td></tr>' +
+        '<tr><td style="padding:8px 10px;color:#8AA8C0;border-bottom:1px solid #1A2F4A">Date</td><td style="padding:8px 10px;color:#FFFFFF;border-bottom:1px solid #1A2F4A">' + dt + '</td></tr>' +
+        '<tr><td style="padding:8px 10px;color:#8AA8C0;border-bottom:1px solid #1A2F4A">Original</td><td style="padding:8px 10px;color:#FFFFFF;border-bottom:1px solid #1A2F4A">' + m.originalValue + ' hrs</td></tr>' +
+        '<tr><td style="padding:8px 10px;color:#8AA8C0">New value</td><td style="padding:8px 10px;color:#FFFFFF">' + m.editedValue + ' hrs</td></tr>' +
+        '</table>';
+      document.getElementById('modalOverlay').style.display = 'flex';
     };
 
     window.rhPencilClick = function (ev, pencilEl) {
@@ -697,22 +719,116 @@ select option { background:#0D1F3C;color:#FFFFFF; }
 
     async function loadData(){
       try{
+        ['module-home','module-daily','module-runhrs','module-boatspecs','module-certs'].forEach(function(id){
+          var el=document.getElementById(id);
+          if(el&&!el.dataset.loaded){
+            el.innerHTML='<div class="loading-pulse">Loading data\u2026</div>';
+          }
+        });
         const [r1,r2]=await Promise.all([fetch(SHEET_URL),fetch(SPECS_URL)]);
         const [j1,j2]=await Promise.all([r1.json(),r2.json()]);
         if(j1.values&&j1.values.length>=2){const h=j1.values[0];allRows=j1.values.slice(1).map(row=>{const o={};h.forEach((k,i)=>o[k]=row[i]||'');return o;});}else{allRows=[];}
         if(j2.values&&j2.values.length>=2){const h=j2.values[0];specRows=j2.values.slice(1).map(row=>{const o={};h.forEach((k,i)=>o[k]=row[i]||'');return o;});}else{specRows=[];}
+        window._lastRefresh=new Date();
+        updateRefreshTs();
+        ['module-home','module-daily','module-runhrs','module-boatspecs','module-certs'].forEach(function(id){
+          var el=document.getElementById(id);if(el)el.dataset.loaded='1';
+        });
         renderAll();
       }catch(e){console.error('Sheets fetch failed',e);}
     }
 
+    function updateRefreshTs(){
+      var el=document.getElementById('refresh-ts');if(!el||!window._lastRefresh)return;
+      var sec=Math.floor((Date.now()-window._lastRefresh.getTime())/1000);
+      if(sec<60)el.textContent='Just now';
+      else if(sec<3600)el.textContent=Math.floor(sec/60)+' min ago';
+      else el.textContent=Math.floor(sec/3600)+'h ago';
+    }
+    setInterval(updateRefreshTs,60000);
+
     function renderAll(){
-      if(activeModule==='daily'){if(activeView==='daily')renderDaily();else renderMonthly();}
+      if(activeModule==='home')renderHome();
+      else if(activeModule==='daily'){if(activeView==='daily')renderDaily();else if(activeView==='fuel')renderFuel();else renderMonthly();}
       else if(activeModule==='runhrs'){
         if(activeRunhrs==='fleet')renderFleet().catch(function(e){console.error(e);});
         else if(activeRunhrs==='runhrs')renderRunhrs();
         else renderSpecs();
       }
       else if(activeModule==='boatspecs')renderBoatSpecs();
+    }
+
+    // ── HOME MODULE ──
+    function renderHome(){
+      var el=document.getElementById('module-home');if(!el)return;
+      var today=todaySGT();
+      var allBoats=SEA_CABBIE.concat(SG_SHIPPING);
+      var okN=0,alertN=0,critN=0,missN=0;
+      var cards=[];
+      allBoats.forEach(function(b){
+        var st=boatStatus(b,today);
+        if(st==='ok')okN++;else if(st==='alert')alertN++;else if(st==='critical')critN++;else missN++;
+        cards.push({boat:b,status:st});
+      });
+
+      var html='<div style="padding:18px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:16px">';
+      // Fleet Health Summary
+      html+='<div style="display:flex;gap:10px;flex-wrap:wrap">';
+      html+=countBox(okN,'\u2705 OK','#071E14','#1A5A3A');
+      html+=countBox(alertN,'\u26A0\uFE0F Alert','#1E1200','#7A5000');
+      html+=countBox(critN,'\uD83D\uDD34 Critical','#1E0808','#7A2020');
+      html+=countBox(missN,'\u2B1B No Report','#0D1A2A','#1E3A5F');
+      html+='</div>';
+
+      // Boat cards grouped by fleet
+      function boatCardGroup(title,boats){
+        var g='<div style="font-size:var(--fs-t6);font-weight:700;color:#8AA8C0;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">'+title+'</div>';
+        g+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:6px">';
+        boats.forEach(function(b){
+          var st=boatStatus(b,today);
+          var row=rowsForBoatDate(b,today)[0]||null;
+          var alerts=row?collectAlerts(row,b):[];
+          var alertText='';
+          if(st==='alert'||st==='critical'){alertText=alerts[0]||'';}
+          if(st==='missing'){alertText='No report';}
+          var alertColor=st==='critical'?'#C84040':st==='alert'?'#D4920A':'#3A5A7A';
+          g+='<div onclick="selectedBoat=\''+b+'\';switchModule(\'daily\');switchDailyView(\'daily\',document.querySelector(\'.ttab\'))" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#0D1F3C;border:1px solid '+cardBorder(st)+';border-radius:6px;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background=\'#0F2540\'" onmouseout="this.style.background=\'#0D1F3C\'">';
+          g+='<div style="width:8px;height:8px;border-radius:50%;background:'+dotColour(st)+';flex-shrink:0"></div>';
+          g+='<div style="font-size:var(--fs-t2);font-weight:600;color:#FFFFFF;flex:1">'+b+'</div>';
+          if(alertText){g+='<div style="font-size:var(--fs-t6);color:'+alertColor+';max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+alertText+'</div>';}
+          g+='</div>';
+        });
+        g+='</div>';
+        return g;
+      }
+      html+=boatCardGroup('Sea Cabbie',SEA_CABBIE);
+      html+=boatCardGroup('SG Shipping',SG_SHIPPING);
+
+      // Cert Expiry Warnings (30 days)
+      html+='<div style="margin-top:4px">';
+      html+='<div style="font-size:var(--fs-t6);font-weight:700;color:#8AA8C0;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">CERT EXPIRY WARNINGS</div>';
+      var certWarnings=[];
+      if(typeof CERT_DATA!=='undefined'&&typeof CERT_WORKING!=='undefined'){
+        Object.keys(CERT_DATA).forEach(function(boat){
+          var data=CERT_WORKING[boat]||CERT_DATA[boat];if(!data)return;
+          allCerts(data).forEach(function(c){
+            var d=certDaysLeft(c.expiry);
+            if(d>=0&&d<=30){certWarnings.push({boat:boat,name:c.name,days:d});}
+          });
+        });
+      }
+      certWarnings.sort(function(a,b){return a.days-b.days;});
+      if(certWarnings.length){
+        certWarnings.forEach(function(w){
+          var icon=w.days<=14?'\uD83D\uDD34':'\u26A0\uFE0F';
+          html+='<div style="font-size:var(--fs-t5);color:#8AA8C0;padding:4px 0">'+icon+' '+w.boat+' \u2014 '+w.name+' expires in '+w.days+' day'+(w.days!==1?'s':'')+'</div>';
+        });
+      }else{
+        html+='<div style="font-size:var(--fs-t5);color:#1A9A6A;padding:4px 0">\u2705 No certificates expiring in the next 30 days</div>';
+      }
+      html+='</div>';
+      html+='</div>';
+      el.innerHTML=html;
     }
 
     // ── DAILY REPORTS MODULE ──
@@ -849,7 +965,47 @@ select option { background:#0D1F3C;color:#FFFFFF; }
     function nextMonth(){currentMonth++;if(currentMonth>11){currentMonth=0;currentYear++;}renderGrid();}
     function sHead(t,first){return `<div style="font-size:var(--fs-t3);font-weight:700;color:var(--color-heading);letter-spacing:0.08em;text-transform:uppercase;margin:${first?'0':'14px 0 8px'};padding-top:${first?'0':'12px'};padding-bottom:5px;border-top:${first?'none':'0.5px solid #1A2F4A'};border-bottom:0.5px solid rgba(91,196,168,0.25)">${t}</div>`;}
     function pRow(label,val,col,isCrit){return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid #0D1628"><span style="font-size:var(--fs-t5);color:var(--color-label)">${label}</span><span style="font-size:var(--fs-t4);font-weight:${col?'600':'500'};color:${col||(isCrit?'#C84040':'var(--color-value)')}">${val}</span></div>`;}
-    function switchDailyView(view,el){activeView=view;document.querySelectorAll('.ttab').forEach(t=>t.classList.remove('on'));el.classList.add('on');document.getElementById('v-daily').style.display=view==='daily'?'block':'none';document.getElementById('v-monthly').style.display=view==='monthly'?'block':'none';document.getElementById('left-rail').style.display=view==='monthly'?'flex':'none';if(view==='monthly')renderMonthly();else renderDaily();}
+    function switchDailyView(view,el){activeView=view;document.querySelectorAll('.ttab').forEach(t=>t.classList.remove('on'));if(el)el.classList.add('on');document.getElementById('v-daily').style.display=view==='daily'?'block':'none';document.getElementById('v-monthly').style.display=view==='monthly'?'block':'none';document.getElementById('left-rail').style.display=view==='monthly'?'flex':'none';var vf=document.getElementById('v-fuel');if(vf)vf.style.display=view==='fuel'?'block':'none';if(view==='monthly')renderMonthly();else if(view==='fuel')renderFuel();else renderDaily();}
+    // ── FUEL VIEW ──
+    function renderFuel(){
+      var el=document.getElementById('v-fuel');if(!el)return;
+      var html='<div style="font-size:var(--fs-t3);font-weight:700;color:var(--color-heading);margin-bottom:14px">Fuel Summary \u2014 '+MONTH_NAMES[currentMonth]+' '+currentYear+'</div>';
+      html+='<div style="display:flex;gap:8px;margin-bottom:14px"><button onclick="currentMonth--;if(currentMonth<0){currentMonth=11;currentYear--;}renderFuel()" style="background:none;border:0.5px solid #1E3A5F;border-radius:5px;color:#8AA8C0;font-size:15px;width:22px;height:22px;cursor:pointer">&#8249;</button><button onclick="currentMonth++;if(currentMonth>11){currentMonth=0;currentYear++;}renderFuel()" style="background:none;border:0.5px solid #1E3A5F;border-radius:5px;color:#8AA8C0;font-size:15px;width:22px;height:22px;cursor:pointer">&#8250;</button></div>';
+      function fuelGroup(title,boats){
+        var g='<div style="font-size:var(--fs-t6);font-weight:700;color:#8AA8C0;letter-spacing:0.1em;text-transform:uppercase;margin:12px 0 6px">'+title+'</div>';
+        g+='<table style="border-collapse:collapse;width:100%;font-size:var(--fs-t4)">';
+        g+='<thead><tr>';
+        ['Boat','FO Port (L)','FO Stbd (L)','Total (L)','Last Bunkered','Qty Bunkered (L)'].forEach(function(h){
+          g+='<th style="text-align:left;padding:6px 10px;border-bottom:2px solid #1E3A5F;font-size:var(--fs-t6);font-weight:700;color:#5A7A9A;text-transform:uppercase;letter-spacing:0.06em">'+h+'</th>';
+        });
+        g+='</tr></thead><tbody>';
+        boats.forEach(function(boat,bi){
+          var rows=rowsForBoatMonth(boat,currentMonth,currentYear).sort(function(a,b){return new Date(b['Submitted At']||b['Date'])-new Date(a['Submitted At']||a['Date']);});
+          var latest=rows[0]||{};
+          var foP=latest['FO Port Level (L)']||'\u2014';
+          var foS=latest['FO Stbd Level (L)']||'\u2014';
+          var total=(parseFloat(foP)||0)+(parseFloat(foS)||0);
+          var totalStr=(foP==='\u2014'&&foS==='\u2014')?'\u2014':total.toFixed(0);
+          var bunkered=latest['Bunkered']||'\u2014';
+          var qtyBunkered=latest['Quantity Bunkered']||'\u2014';
+          var bg=bi%2===0?'#0A1628':'#0B1A2E';
+          g+='<tr style="background:'+bg+'">';
+          g+='<td style="padding:8px 10px;font-weight:600;color:#FFFFFF;border-bottom:1px solid #1A2F4A">'+boat+'</td>';
+          g+='<td style="padding:8px 10px;color:#7ACFAA;border-bottom:1px solid #1A2F4A">'+foP+'</td>';
+          g+='<td style="padding:8px 10px;color:#7ACFAA;border-bottom:1px solid #1A2F4A">'+foS+'</td>';
+          g+='<td style="padding:8px 10px;color:#FFFFFF;font-weight:600;border-bottom:1px solid #1A2F4A">'+totalStr+'</td>';
+          g+='<td style="padding:8px 10px;color:#8AA8C0;border-bottom:1px solid #1A2F4A">'+bunkered+'</td>';
+          g+='<td style="padding:8px 10px;color:#8AA8C0;border-bottom:1px solid #1A2F4A">'+qtyBunkered+'</td>';
+          g+='</tr>';
+        });
+        g+='</tbody></table>';
+        return g;
+      }
+      html+=fuelGroup('Sea Cabbie',SEA_CABBIE);
+      html+=fuelGroup('SG Shipping',SG_SHIPPING);
+      el.innerHTML=html;
+    }
+
     function closeModal(){document.getElementById('modalOverlay').style.display='none';}
     function downloadPDF(){
       const boat=document.getElementById('modal-boat').textContent;
@@ -895,7 +1051,15 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
 
     // ── MODAL ──
     function openModal(boat,dateStr){
-      const row=rowsForBoatDate(boat,dateStr)[0]||null;if(!row)return;
+      const row=rowsForBoatDate(boat,dateStr)[0]||null;
+      if(!row){
+        document.getElementById('modal-boat').textContent=boat;
+        document.getElementById('modal-date').textContent=fmtDate(dateStr);
+        document.getElementById('modal-badge').innerHTML='';
+        document.getElementById('modal-body').innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;color:#3A5A7A"><div style="font-size:36px;margin-bottom:12px">\uD83D\uDCCB</div><div style="font-size:15px;font-weight:600;color:#5A7A9A;margin-bottom:6px">No report submitted</div><div style="font-size:13px;color:#3A5A7A">'+boat+' has not submitted a report for '+fmtDate(dateStr)+'</div></div>';
+        document.getElementById('modalOverlay').style.display='flex';
+        return;
+      }
       const alerts=collectAlerts(row,boat);const status=boatStatus(boat,dateStr);
       const time=toSGTTime(row['Submitted At']);const dAgo=daysAgo(dateStr);const hasPics=dAgo<=7;
       const badgeBg=status==='critical'?'#1E0808':status==='alert'?'#1E1200':'#071E14';
@@ -1018,10 +1182,11 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
 
     function switchDailyView(view,el){
       activeView=view;
-      document.querySelectorAll('.ttab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
+      document.querySelectorAll('.ttab').forEach(t=>t.classList.remove('on'));if(el)el.classList.add('on');
       document.getElementById('left-rail').style.display=view==='monthly'?'flex':'none';
       document.getElementById('v-daily').style.display=view==='daily'?'block':'none';
       document.getElementById('v-monthly').style.display=view==='monthly'?'block':'none';
+      var vf=document.getElementById('v-fuel');if(vf)vf.style.display=view==='fuel'?'block':'none';
       renderAll();
     }
     function switchRunhrsView(view,el){
@@ -1039,6 +1204,34 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
     let bsOpenSG = true, bsOpenSC = true;
 
     // ── FLEET MONTHLY OVERVIEW ──
+    function buildSparkline(boat,months){
+      var last6=months.slice(0,6).reverse();
+      var pVals=[],sVals=[];
+      last6.forEach(function(mo){
+        pVals.push(runHrsDisplayForMonth(boat,'Port',mo.month,mo.year));
+        sVals.push(runHrsDisplayForMonth(boat,'Stbd',mo.month,mo.year));
+      });
+      var pValid=pVals.filter(function(v){return v!==null;});
+      var sValid=sVals.filter(function(v){return v!==null;});
+      if(pValid.length<2&&sValid.length<2)return '\u2014';
+      var allNums=pValid.concat(sValid);
+      var mn=Math.min.apply(null,allNums),mx=Math.max.apply(null,allNums);
+      if(mx===mn)mx=mn+1;
+      var w=80,h=24;
+      function line(vals,color){
+        var pts=[];
+        vals.forEach(function(v,i){
+          if(v===null)return;
+          var x=Math.round(i/(last6.length-1)*w);
+          var y=Math.round(h-((v-mn)/(mx-mn))*h);
+          pts.push(x+','+y);
+        });
+        if(pts.length<2)return '';
+        return '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+color+'" stroke-width="1.5"/>';
+      }
+      return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+line(pVals,'#FFFFFF')+line(sVals,'#7ACFAA')+'</svg>';
+    }
+
     async function renderFleet(){
       const container=document.getElementById('v-fleet');
       const boats=fleetCompany==='Sea Cabbie'?SEA_CABBIE:SG_SHIPPING;
@@ -1066,6 +1259,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
           ${fleetOlderShown?'Newer ▶':'◀ Older'}
         </div>
       </th>`;
+      html+=`<th style="text-align:center;min-width:90px;padding:8px 12px;border-left:1px solid #1E3A5F;border-bottom:2px solid #1E3A5F;font-size:var(--fs-t6);font-weight:700;color:#8AA8C0;background:#071828;text-transform:uppercase;letter-spacing:0.06em">Trend</th>`;
       html+=`</tr></thead>`;
 
       // ── Body: per boat = 3 rows ──
@@ -1093,6 +1287,8 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
           html+=`<td style="border-left:1px solid #1A2F4A;border-top:2px solid #1A3A5F;border-bottom:none;background:${isLatest?'#0D2234':rowBg}"></td>`;
         });
         html+=`<td style="background:#071828;border-left:1px solid #1A2F4A;border-top:2px solid #1A3A5F;border-bottom:none"></td>`;
+        // Sparkline cell (rowspan=3)
+        html+=`<td rowspan="3" style="text-align:center;vertical-align:middle;background:#071828;border-left:1px solid #1A2F4A;border-top:2px solid #1A3A5F;padding:4px">${buildSparkline(boat,months)}</td>`;
         html+=`</tr>`;
 
         // ── Row 2: Port Engine ──
@@ -1443,18 +1639,9 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         handleLogin();
         return;
       }
-      // Legacy fallback — only used if Firebase fails to initialise
-      const pass=document.getElementById('login-pass')
-        ?(document.getElementById('login-pass').value||'')
-        :((document.getElementById('login-input')||{}).value||'');
-      if(pass===DASHBOARD_PASS){
-        initPermissions('admin',{}, '', '');
-        applyRoleGating();
-        showDashboard();
-      }else{
-        const err=document.getElementById('login-error');
-        if(err)err.textContent='Incorrect password.';
-      }
+      // Legacy fallback removed — Firebase Auth is the sole auth mechanism
+      const err=document.getElementById('login-error');
+      if(err)err.textContent='Firebase unavailable. Please refresh or contact admin.';
     }
 
     // ═══════════════════════════════════════════════════════
@@ -1734,13 +1921,13 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       if(co==='compliance'){
         document.getElementById('certs-boat-title').textContent='Compliance Overview';
         document.getElementById('cert-subtabs').style.display='none';
-        ['class','hcl','radio','insurance'].forEach(t=>document.getElementById('cert-panel-'+t).style.display='none');
+        ['class','hcl','radio','insurance','calendar'].forEach(t=>document.getElementById('cert-panel-'+t).style.display='none');
         certRenderCompliance();
       } else {
         document.getElementById('cert-panel-compliance').style.display='none';
         document.getElementById('certs-boat-title').textContent='Select a vessel';
         document.getElementById('cert-subtabs').style.display='none';
-        ['class','hcl','radio','insurance'].forEach(t=>{
+        ['class','hcl','radio','insurance','calendar'].forEach(t=>{
           document.getElementById('cert-panel-'+t).style.display='none';
           document.getElementById('cert-panel-'+t).innerHTML='';
         });
@@ -1778,8 +1965,8 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
 
     function certSwitchTab(tab){
       certActiveTab=tab;
-      ['class','hcl','radio','insurance'].forEach(t=>{
-        var vis=!certActiveBoat||isCertTabVisible(certActiveBoat,t);
+      ['class','hcl','radio','insurance','calendar'].forEach(t=>{
+        var vis=!certActiveBoat||isCertTabVisible(certActiveBoat,t)||t==='calendar';
         document.getElementById('ctab-'+t).style.display=vis?'':'none';
         document.getElementById('ctab-'+t).classList.toggle('on',t===tab);
         document.getElementById('cert-panel-'+t).style.display=(t===tab&&vis)?'block':'none';
@@ -1819,7 +2006,54 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
         h+=certAddBtn(boat,'insurance');
         el.innerHTML=h;
       }
+      if(tab==='calendar'){
+        certRenderCalendar();
+      }
       applyRoleGating();
+    }
+
+    function certRenderCalendar(){
+      var el=document.getElementById('cert-panel-calendar');if(!el)return;
+      var now=new Date();now.setHours(0,0,0,0);
+      var items=[];
+      var boatsToScan=certActiveBoat?[certActiveBoat]:ALL_BOATS;
+      boatsToScan.forEach(function(boat){
+        var data=CERT_WORKING[boat]||CERT_DATA[boat];if(!data)return;
+        allCerts(data).forEach(function(c){
+          var d=certDaysLeft(c.expiry);
+          if(d>=0&&d<=60)items.push({boat:boat,name:c.name,expiry:c.expiry,days:d});
+        });
+      });
+      items.sort(function(a,b){return new Date(a.expiry)-new Date(b.expiry);});
+      if(!items.length){
+        el.innerHTML='<div style="text-align:center;padding:32px;color:#1A9A6A;font-size:14px">\u2705 All clear \u2014 no certificates expiring in the next 60 days</div>';
+        return;
+      }
+      var grouped={};
+      items.forEach(function(it){
+        var dt=new Date(it.expiry);
+        var key=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');
+        var label=MONTH_NAMES[dt.getMonth()]+' '+dt.getFullYear();
+        if(!grouped[key])grouped[key]={label:label,items:[]};
+        grouped[key].items.push(it);
+      });
+      var h='';
+      Object.keys(grouped).sort().forEach(function(key){
+        var g=grouped[key];
+        h+='<div style="font-size:var(--fs-t3);font-weight:700;color:var(--color-heading);letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;padding-bottom:5px;border-bottom:0.5px solid #1A3050">'+g.label+'</div>';
+        g.items.forEach(function(it){
+          var dot=it.days<=14?'#C84040':it.days<=30?'#D4920A':'#1A9A6A';
+          var dt=new Date(it.expiry);
+          var dayStr=MONTH_SHORT[dt.getMonth()]+' '+dt.getDate();
+          h+='<div onclick="certSelectBoat(\''+it.boat.replace(/'/g,"\\'")+'\',null)" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:0.5px solid #0D1A2E;cursor:pointer;transition:background 0.1s" onmouseover="this.style.background=\'rgba(58,143,191,0.04)\'" onmouseout="this.style.background=\'transparent\'">';
+          h+='<span style="font-size:var(--fs-t5);color:#8AA8C0;min-width:50px">'+dayStr+'</span>';
+          h+='<span style="font-size:var(--fs-t4);color:#FFFFFF;flex:1">'+it.boat+'</span>';
+          h+='<span style="font-size:var(--fs-t5);color:#8AA8C0;flex:1">'+it.name+'</span>';
+          h+='<span style="width:8px;height:8px;border-radius:50%;background:'+dot+'"></span>';
+          h+='</div>';
+        });
+      });
+      el.innerHTML=h;
     }
 
     function certRenderCompliance(){
@@ -2655,7 +2889,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
 
     function switchModule(mod){
       activeModule=mod;
-      ['daily','runhrs','boatspecs','certs'].forEach(function(m){
+      ['home','daily','runhrs','boatspecs','certs'].forEach(function(m){
         var t=document.getElementById('tab-'+m);
         var e=document.getElementById('module-'+m);
         if(t) t.style.opacity=(m===mod)?'1':'0.55';
@@ -2829,11 +3063,27 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       </div>
     </div>
 
+    <div id="refresh-ts" style="font-size:13px;color:#5A7A9A;flex-shrink:0"></div>
+
     <!-- Nirix logo + brand box -->
     <div style="display:flex;align-items:center;gap:10px;padding:6px 14px;background:#0A1E30;border:1.5px solid #0D6A7A;border-radius:8px;box-shadow:0 0 12px rgba(13,100,130,0.3);flex-shrink:0">
-      <div id="logo-nirix-wrap"></div>
+      <div id="logo-nirix-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="#0D9AAA" stroke-width="2" fill="none"/>
+          <circle cx="12" cy="12" r="3" fill="#0D9AAA"/>
+          <line x1="12" y1="2" x2="12" y2="7" stroke="#0D9AAA" stroke-width="2" stroke-linecap="round"/>
+          <line x1="12" y1="17" x2="12" y2="22" stroke="#0D9AAA" stroke-width="2" stroke-linecap="round"/>
+          <line x1="2" y1="12" x2="7" y2="12" stroke="#0D9AAA" stroke-width="2" stroke-linecap="round"/>
+          <line x1="17" y1="12" x2="22" y2="12" stroke="#0D9AAA" stroke-width="2" stroke-linecap="round"/>
+          <line x1="4.93" y1="4.93" x2="8.17" y2="8.17" stroke="#0D9AAA" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="15.83" y1="15.83" x2="19.07" y2="19.07" stroke="#0D9AAA" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="4.93" y1="19.07" x2="8.17" y2="15.83" stroke="#0D9AAA" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="15.83" y1="8.17" x2="19.07" y2="4.93" stroke="#0D9AAA" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
       <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px">
         <div style="font-size:var(--fs-t6);font-weight:700;color:#FFFFFF;letter-spacing:3px;text-transform:uppercase">NIRIX</div>
+        <div style="font-size:var(--fs-t6);color:#5A9AAA;letter-spacing:0.04em">Technical Dashboard</div>
         <div id="header-date" style="font-size:var(--fs-t6);color:#8AA8C0;letter-spacing:0.06em"></div>
       </div>
     </div>
@@ -2842,14 +3092,21 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
 
 
   <div id="module-nav" style="background:#0D1F3C;border-bottom:1px solid #1E3A5F;padding:0 18px;display:flex;align-items:flex-end;gap:6px;flex-shrink:0">
-    <div id="tab-daily" onclick="switchModule('daily')" style="padding:5px 10px 0;margin-top:5px;border:1px solid #1E3A5F;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:1">
+    <div id="tab-home" onclick="switchModule('home')" style="padding:5px 10px 0;margin-top:5px;border:1px solid #0D6A7A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;align-items:center;cursor:pointer;opacity:1">
+      <span class="stab-icon" style="font-size:16px;line-height:1">&#127968;</span>
+      <div style="font-size:var(--fs-t5);font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Home</div>
+    </div>
+    <div id="tab-daily" onclick="switchModule('daily')" style="padding:5px 10px 0;margin-top:5px;border:1px solid #1E3A5F;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
+      <span class="stab-icon" style="font-size:16px;line-height:1;text-align:center;display:block">&#128203;</span>
       <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Daily Reports</div>
       <div style="display:flex;gap:2px;margin-top:3px">
         <div class="ttab on" onclick="event.stopPropagation();switchModule('daily');switchDailyView('daily',this)" style="padding:5px 12px;font-size:var(--fs-t5);border-radius:4px 4px 0 0">Daily view</div>
         <div class="ttab" onclick="event.stopPropagation();switchModule('daily');switchDailyView('monthly',this)" style="padding:5px 12px;font-size:var(--fs-t5);border-radius:4px 4px 0 0">Monthly view</div>
+        <div class="ttab" onclick="event.stopPropagation();switchModule('daily');switchDailyView('fuel',this)" style="padding:5px 12px;font-size:var(--fs-t5);border-radius:4px 4px 0 0">Fuel</div>
       </div>
     </div>
     <div id="tab-runhrs" onclick="switchModule('runhrs')" style="padding:5px 10px 0;margin-top:5px;border:1px solid #0D8A9A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
+      <span class="stab-icon" style="font-size:16px;line-height:1;text-align:center;display:block">&#9881;&#65039;</span>
       <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Engine Run-hrs Records</div>
       <div style="display:flex;gap:2px;margin-top:3px">
         <div class="stab on" onclick="event.stopPropagation();switchModule('runhrs');switchRunhrsView('fleet',this)" style="padding:5px 12px;font-size:var(--fs-t5);border-radius:4px 4px 0 0">Fleet monthly overview</div>
@@ -2857,12 +3114,14 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       </div>
     </div>
     <div id="tab-boatspecs" onclick="switchModule('boatspecs')" style="padding:5px 10px 0;margin-top:5px;border:1px solid #1A6A3A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
+      <span class="stab-icon" style="font-size:16px;line-height:1;text-align:center;display:block">&#128674;</span>
       <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Boat Tech. Specs</div>
       <div style="display:flex;gap:2px;margin-top:3px">
         <div class="btab on" style="padding:5px 12px;font-size:var(--fs-t5);border-radius:4px 4px 0 0;color:#FFFFFF;font-weight:500;background:#0D2A1A;border-bottom:2px solid #1A9A5A">All vessels</div>
       </div>
     </div>
     <div id="tab-certs" onclick="switchModule('certs')" style="padding:5px 10px 0;margin-top:5px;border:1px solid #2A6A9A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
+      <span class="stab-icon" style="font-size:16px;line-height:1;text-align:center;display:block">&#128196;</span>
       <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Certification</div>
       <div style="display:flex;gap:2px;margin-top:3px">
         <div style="padding:5px 12px;font-size:var(--fs-t5);border-radius:4px 4px 0 0;color:#5AB8E8;font-weight:500;background:#081828;border-bottom:2px solid #3A8FBF">Compliance</div>
@@ -2881,12 +3140,14 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
   </div>
 
   <div style="flex:1;display:flex;overflow:hidden">
-    <div id="module-daily" style="flex:1;display:flex;overflow:hidden">
+    <div id="module-home" style="flex:1;display:flex;flex-direction:column;overflow:hidden"></div>
+    <div id="module-daily" style="flex:1;display:none;overflow:hidden">
       <div id="left-rail" style="display:none;width:195px;min-width:195px;border-right:1px solid #1E3A5F;flex-direction:column;background:#0D1F3C;overflow-y:auto">
         <div id="rail-inner"></div>
       </div>
       <div id="daily-main" style="flex:1;display:flex;flex-direction:column">
         <div id="v-daily" style="overflow-y:auto;padding:14px 18px;flex:1"></div>
+        <div id="v-fuel" style="display:none;overflow:auto;padding:14px 18px;flex:1"></div>
         <div id="v-monthly" style="display:none;overflow:auto;padding:14px 18px;flex:1">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
             <button onclick="prevMonth()" style="width:22px;height:22px;background:none;border:0.5px solid #1E3A5F;border-radius:5px;cursor:pointer;font-size:15px;color:#8AA8C0">&#8249;</button>
@@ -2948,6 +3209,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
             <div class="ctab"    id="ctab-hcl"       onclick="certSwitchTab('hcl')"       style="padding:7px 16px;font-size:var(--fs-t5);border-radius:6px 6px 0 0">HCL</div>
             <div class="ctab"    id="ctab-radio"     onclick="certSwitchTab('radio')"     style="padding:7px 16px;font-size:var(--fs-t5);border-radius:6px 6px 0 0">Radio &amp; LSA FFE</div>
             <div class="ctab"    id="ctab-insurance" onclick="certSwitchTab('insurance')" style="padding:7px 16px;font-size:var(--fs-t5);border-radius:6px 6px 0 0">Insurance</div>
+            <div class="ctab"    id="ctab-calendar" onclick="certSwitchTab('calendar')" style="padding:7px 16px;font-size:var(--fs-t5);border-radius:6px 6px 0 0">Calendar</div>
           </div>
         </div>
         <div id="certs-right-body" style="flex:1;overflow-y:auto;padding:18px 20px">
@@ -2956,6 +3218,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
           <div id="cert-panel-hcl"       style="display:none"></div>
           <div id="cert-panel-radio"     style="display:none"></div>
           <div id="cert-panel-insurance" style="display:none"></div>
+          <div id="cert-panel-calendar" style="display:none"></div>
         </div>
       </div>
     </div>

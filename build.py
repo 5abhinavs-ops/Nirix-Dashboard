@@ -243,7 +243,7 @@ def strip_fleet_from_html(idx):
 SWITCH_MODULE_NO_FLEET = """
     function switchModule(mod){
       activeModule=mod;
-      ['daily','runhrs','boatspecs','certs'].forEach(function(m){
+      ['home','daily','runhrs','boatspecs','certs'].forEach(function(m){
         var t=document.getElementById('tab-'+m);
         var e=document.getElementById('module-'+m);
         if(t) t.style.opacity=(m===mod)?'1':'0.55';
@@ -656,7 +656,7 @@ window.initFleetModule=async function(){
     }}
     function switchModule(mod){{
       activeModule=mod;
-      ['daily','runhrs','boatspecs','certs','fleet'].forEach(function(m){{
+      ['home','daily','runhrs','boatspecs','certs','fleet'].forEach(function(m){{
         var t=document.getElementById('tab-'+m);
         var e=document.getElementById('module-'+m);
         if(t) t.style.opacity=(m===mod)?'1':'0.55';
@@ -756,6 +756,8 @@ window.initFleetModule=async function(){
 
     # ── Sanity checks ─────────────────────────────────────────────────────
     checks = [
+        ('module-home div',     '<div id="module-home"' in idx),
+        ('tab-home',            'id="tab-home"' in idx),
         ('module-fleet div',    '<div id="module-fleet"' in idx),
         ('tab-fleet',           'id="tab-fleet"' in idx),
         ('switchModule',        'function switchModule' in idx),
@@ -764,6 +766,8 @@ window.initFleetModule=async function(){
         ('no inline fleet JS',  'FLEET JS' not in idx),
         ('single module-fleet', idx.count('<div id="module-fleet"') == 1),
         ('single tab-fleet',    idx.count('id="tab-fleet"') == 1),
+        ('no API key leak',     'SHEETS_API_KEY' not in idx),
+        ('no DASHBOARD_PASS',   "DASHBOARD_PASS" not in idx),
         ('app height:100vh',    'height:100vh' in idx),
     ]
     all_ok = True
