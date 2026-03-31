@@ -3009,10 +3009,10 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
 .ln-input-underline{position:absolute;bottom:0;left:50%;transform:translateX(-50%);height:2px;width:0;background:#00f0ff;box-shadow:0 0 10px #00f0ff;transition:width 0.5s ease-out;pointer-events:none;}
 .ln-input-group:focus-within .ln-input-underline{width:100%;}
 .ln-input-inner{position:relative;display:flex;align-items:center;padding:16px 20px;}
-.ln-input-field{position:relative;z-index:10;width:100%;background:transparent;border:none;outline:none;color:#ffffff;font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:500;-webkit-text-fill-color:#ffffff;}
-.ln-input-field::placeholder{color:transparent;}
-.ln-input-label{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:#94a3b8;font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:500;letter-spacing:0.04em;pointer-events:none;transition:transform 0.3s,color 0.3s,background-color 0.3s,padding 0.3s,letter-spacing 0.3s;z-index:20;}
-.ln-input-field:not(:placeholder-shown) ~ .ln-input-label,.ln-input-field:focus ~ .ln-input-label{transform:translateY(-24px) scale(0.85);color:#00f0ff;background-color:#060f1e;padding:0 8px;letter-spacing:0.1em;}
+.ln-input-field{position:relative;z-index:10;width:100%;background:transparent;border:none;outline:none;color:#ffffff;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:500;-webkit-text-fill-color:#ffffff;}
+.ln-input-field::placeholder{color:#64748b;font-size:14px;font-family:'Rajdhani',sans-serif;letter-spacing:0.06em;}
+.ln-input-label{display:none;}
+.ln-input-field:not(:placeholder-shown) ~ .ln-input-label,.ln-input-field:focus ~ .ln-input-label{display:none;}
 .ln-input-field:-webkit-autofill,.ln-input-field:-webkit-autofill:hover,.ln-input-field:-webkit-autofill:focus,.ln-input-field:-webkit-autofill:active{-webkit-box-shadow:0 0 0 30px #0a192f inset !important;-webkit-text-fill-color:#ffffff !important;transition:background-color 5000s ease-in-out 0s;}
 .ln-input-ph-wrap{margin-left:16px;flex-shrink:0;z-index:10;color:#64748b;transition:color 0.3s;display:flex;align-items:center;}
 .ln-input-group:focus-within .ln-input-ph-wrap{color:#00f0ff;}
@@ -3070,7 +3070,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
             <div class="ln-input-border"></div>
             <div class="ln-input-underline"></div>
             <div class="ln-input-inner">
-              <input id="login-email" type="email" placeholder=" " class="ln-input-field" onkeydown="if(event.key==='Enter')handleLogin()">
+              <input id="login-email" type="email" placeholder="Email address" class="ln-input-field" onkeydown="if(event.key==='Enter')handleLogin()">
               <label for="login-email" class="ln-input-label">Email address</label>
               <div class="ln-input-ph-wrap"><i class="ph ph-user-focus"></i></div>
             </div>
@@ -3079,7 +3079,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
             <div class="ln-input-border"></div>
             <div class="ln-input-underline"></div>
             <div class="ln-input-inner">
-              <input id="login-pass" type="password" placeholder=" " class="ln-input-field" onkeydown="if(event.key==='Enter')handleLogin()">
+              <input id="login-pass" type="password" placeholder="Password" class="ln-input-field" onkeydown="if(event.key==='Enter')handleLogin()">
               <label for="login-pass" class="ln-input-label">Password</label>
               <div class="ln-pass-spacer" aria-hidden="true"></div>
             </div>
@@ -3149,11 +3149,9 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
 
   <div id="module-nav" style="background:#0D1F3C;border-bottom:1px solid #1E3A5F;padding:0 18px;display:flex;align-items:flex-end;gap:6px;flex-shrink:0">
     <div id="tab-home" onclick="switchModule('home')" style="padding:8px 14px 0;margin-top:5px;border:1px solid #0D6A7A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;align-items:center;cursor:pointer;opacity:1">
-      <i class="ph-bold ph-house stab-icon" style="font-size:20px;line-height:1" aria-hidden="true"></i>
       <div style="font-size:var(--fs-t5);font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Home</div>
     </div>
     <div id="tab-daily" onclick="switchModule('daily')" style="padding:8px 14px 0;margin-top:5px;border:1px solid #1E3A5F;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
-      <i class="ph-bold ph-clipboard-text stab-icon" style="font-size:20px;line-height:1;text-align:center;display:block" aria-hidden="true"></i>
       <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Daily Reports</div>
       <div style="display:flex;gap:2px;margin-top:3px">
         <div class="ttab on" onclick="event.stopPropagation();switchModule('daily');switchDailyView('daily',this)" style="padding:8px 14px;font-size:var(--fs-t5);border-radius:4px 4px 0 0">Daily view</div>
@@ -3162,7 +3160,6 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       </div>
     </div>
     <div id="tab-runhrs" onclick="switchModule('runhrs')" style="padding:8px 14px 0;margin-top:5px;border:1px solid #0D8A9A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
-      <i class="ph-bold ph-engine stab-icon" style="font-size:20px;line-height:1;text-align:center;display:block" aria-hidden="true"></i>
       <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Engine Run-hrs Records</div>
       <div style="display:flex;gap:2px;margin-top:3px">
         <div class="stab on" onclick="event.stopPropagation();switchModule('runhrs');switchRunhrsView('fleet',this)" style="padding:8px 14px;font-size:var(--fs-t5);border-radius:4px 4px 0 0">Fleet monthly overview</div>
@@ -3170,14 +3167,12 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       </div>
     </div>
     <div id="tab-boatspecs" onclick="switchModule('boatspecs')" style="padding:8px 14px 0;margin-top:5px;border:1px solid #1A6A3A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
-      <i class="ph-bold ph-boat stab-icon" style="font-size:20px;line-height:1;text-align:center;display:block" aria-hidden="true"></i>
       <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Boat Tech. Specs</div>
       <div style="display:flex;gap:2px;margin-top:3px">
         <div class="btab on" style="padding:8px 14px;font-size:var(--fs-t5);border-radius:4px 4px 0 0;color:#FFFFFF;font-weight:500;background:#0D2A1A;border-bottom:2px solid #1A9A5A">All vessels</div>
       </div>
     </div>
     <div id="tab-certs" onclick="switchModule('certs')" style="padding:8px 14px 0;margin-top:5px;border:1px solid #2A6A9A;border-bottom:none;border-radius:6px 6px 0 0;display:flex;flex-direction:column;cursor:pointer;opacity:0.55">
-      <i class="ph-bold ph-certificate stab-icon" style="font-size:20px;line-height:1;text-align:center;display:block" aria-hidden="true"></i>
       <div style="font-size:20px;font-weight:700;color:#FFFFFF;padding:3px 0;text-align:center">Certification</div>
       <div style="display:flex;gap:2px;margin-top:3px">
         <div style="padding:8px 14px;font-size:var(--fs-t5);border-radius:4px 4px 0 0;color:#5AB8E8;font-weight:500;background:#081828;border-bottom:2px solid #3A8FBF">Compliance</div>
