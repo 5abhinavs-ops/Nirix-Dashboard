@@ -1563,7 +1563,13 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
           ? data.data
           : data;
         if (specsMap && typeof specsMap === 'object' && !Array.isArray(specsMap)) {
-          Object.assign(BOAT_SPECS, specsMap);
+          Object.keys(specsMap).forEach(function(boat){
+            if(!BOAT_SPECS[boat]) BOAT_SPECS[boat]={};
+            Object.keys(specsMap[boat]).forEach(function(k){
+              if(specsMap[boat][k]!==''&&specsMap[boat][k]!==null)
+                BOAT_SPECS[boat][k]=specsMap[boat][k];
+            });
+          });
           _bsLoaded = true;
         }
       } catch(e) {
@@ -1610,7 +1616,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       let h=`<div style="font-size:var(--fs-t1);font-weight:700;color:#FFFFFF;margin-bottom:4px">${name}</div>`;
       h+=`<div style="font-size:var(--fs-t5);color:var(--color-label);margin-bottom:20px">${b['company']} &nbsp;&middot;&nbsp; ${b['SC Number']} &nbsp;&middot;&nbsp; MMSI ${b['MMSI Number']}${b['Year Built']?' &nbsp;&middot;&nbsp; Built '+b['Year Built']:''}</div>`;
       h+=bsSec('Dimensions &amp; registration');
-      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('LOA','LOA',function(v){return v?v+' m':'';})}${row('Breadth','Breadth',function(v){return v?v+' m':'';})}${row('Depth','Depth',function(v){return v?v+' m':'';})}${row('Hull material','Hull')}${row('Class','Class')}${row('Flag','Flag')}</div><div>${row('Pax capacity','Passenger Capacity')}${row('Crew','Crew Capacity')}${row('Mooring buoy','Mooring Buoy')}</div></div>`;
+      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('LOA','LOA',function(v){return v?v+' m':'';})}${row('Breadth','Breadth',function(v){return v?v+' m':'';})}${row('Depth','Depth',function(v){return v?v+' m':'';})}${row('Hull material','Hull')}${b['company']==='Sea Cabbie'?'':row('Class','Class')}${row('Flag','Flag')}</div><div>${row('Pax capacity','Passenger Capacity')}${row('Crew','Crew Capacity')}${row('Mooring buoy','Mooring Buoy')}</div></div>`;
       h+=bsSec('Navigation equipment');
       h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('AIS','AIS')}</div><div>${row('GPS','GPS')}</div></div>`;
       h+=bsSec('Main engine');
@@ -1618,7 +1624,7 @@ ${body.replace(/background:#[0-9A-Fa-f]{3,8}/g,'background:#fff').replace(/color
       h+=bsSec('Generator');
       h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('Model','Generator Model')}${row('Engine','Generator Engine')}</div><div></div></div>`;
       h+=bsSec('Propulsion &amp; fittings');
-      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('Propeller','Propeller Size')}${row('Shaft size','Shaft Size')}</div><div>${row('Rudder','Rudder Size')}${row('Steering type','Steering Type')}</div></div>`;
+      h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px"><div>${row('Propeller','Propeller Size')}${row('Shaft size','Shaft Size')}</div><div>${row('Rudder','Rudder Size')}${b['company']==='Sea Cabbie'?'':row('Steering type','Steering Type')}</div></div>`;
       if(ed)h+=`<div style="margin-top:20px"><button type="button" onclick="bsSaveSpecs()" style="padding:10px 20px;background:#0D6A7A;border:none;border-radius:8px;color:#FFFFFF;font-weight:600;cursor:pointer;font-size:14px;font-family:inherit">Save specs</button></div>`;
       return h;
     }
